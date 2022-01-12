@@ -26,6 +26,9 @@ public class BrokerConfig {
     @Value("${mqtt.broker.port}")
     private Integer port;
 
+    @Value("${mqtt.broker.mqtt-passwd-must:false}")
+    private boolean mqttPasswordMust;
+
     @Value("${mqtt.broker.ssl-enabled:false}")
     private Boolean sslEnabled;
 

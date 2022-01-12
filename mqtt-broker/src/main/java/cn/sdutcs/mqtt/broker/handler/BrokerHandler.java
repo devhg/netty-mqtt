@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -28,7 +27,6 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
     private ChannelGroup channelGroup;
 
     @Autowired
-    // private Map<String, ChannelId> channelIdMap;
     private ConcurrentHashMap<String, ChannelId> channelIdMap;
 
     @Override
