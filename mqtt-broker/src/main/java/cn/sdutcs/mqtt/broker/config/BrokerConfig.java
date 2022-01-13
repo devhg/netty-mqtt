@@ -8,12 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@ComponentScan("cn.sdutcs.mqtt.broker")
 @PropertySource("classpath:application.properties")
-@ConfigurationProperties(prefix = "mqtt.broker")
+// @ConfigurationProperties(prefix = "mqtt.broker")
 @Data
 public class BrokerConfig {
-
     /**
      * Broker唯一标识, 默认mqtt
      */
@@ -58,4 +56,19 @@ public class BrokerConfig {
      */
     @Value("${mqtt.broker.so-keep-alive}")
     private Boolean soKeepAlive;
+
+    /**
+     * 是否启用kafka消息转发
+     */
+    @Value("${mqtt.broker.kafka.broker-enabled:false}")
+    private boolean kafkaBrokerEnabled;
+
+    @Value("${mqtt.broker.kafka.producer.topic:mqtt}")
+    private String kafkaProducerTopic;
+
+    /**
+     * 是否Redis开启集群
+     */
+    @Value("${mqtt.broker.cluster-enabled:false}")
+    private boolean clusterEnabled;
 }

@@ -1,6 +1,6 @@
 package cn.sdutcs.mqtt.broker.protocol;
 
-import cn.sdutcs.mqtt.broker.service.IDupPubRelMessageStoreService;
+import cn.sdutcs.mqtt.common.message.IDupPubRelMessageStoreService;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
 import io.netty.util.AttributeKey;

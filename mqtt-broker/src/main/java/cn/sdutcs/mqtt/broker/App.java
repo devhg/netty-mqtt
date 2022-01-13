@@ -8,11 +8,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "cn.sdutcs.mqtt")
 public class App implements CommandLineRunner {
     @Autowired
     BrokerConfig config;
-
     @Autowired
     BrokerServer server;
 

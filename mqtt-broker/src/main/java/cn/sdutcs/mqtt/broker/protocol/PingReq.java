@@ -1,8 +1,8 @@
 package cn.sdutcs.mqtt.broker.protocol;
 
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
-import cn.sdutcs.mqtt.broker.service.ISessionStoreService;
-import cn.sdutcs.mqtt.broker.service.SessionStore;
+import cn.sdutcs.mqtt.common.session.ISessionStoreService;
+import cn.sdutcs.mqtt.common.session.SessionStore;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelId;
 import io.netty.handler.codec.mqtt.*;

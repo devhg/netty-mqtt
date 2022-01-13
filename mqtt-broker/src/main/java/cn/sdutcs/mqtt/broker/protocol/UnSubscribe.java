@@ -1,6 +1,6 @@
 package cn.sdutcs.mqtt.broker.protocol;
 
-import cn.sdutcs.mqtt.broker.service.ISubscribeStoreService;
+import cn.sdutcs.mqtt.common.subscribe.ISubscribeStoreService;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.*;
 import io.netty.util.AttributeKey;

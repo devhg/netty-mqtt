@@ -1,8 +1,9 @@
-package cn.sdutcs.mqtt.broker.service;
+package cn.sdutcs.mqtt.common.session;
 
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * 会话存储
@@ -88,5 +89,15 @@ public class SessionStore implements Serializable {
     public SessionStore setWillMessage(MqttPublishMessage willMessage) {
         this.willMessage = willMessage;
         return this;
+    }
+
+    public Map<String, Object> toMap() {
+        // todo 实现
+        return null;
+    }
+
+    public static SessionStore ValueOf(Map<String, Object> map) {
+        // todo 实现
+        return null;
     }
 }

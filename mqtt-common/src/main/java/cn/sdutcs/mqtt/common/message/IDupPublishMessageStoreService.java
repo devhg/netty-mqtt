@@ -1,4 +1,4 @@
-package cn.sdutcs.mqtt.broker.service;
+package cn.sdutcs.mqtt.common.message;
 
 import java.util.List;
 

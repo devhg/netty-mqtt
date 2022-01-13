@@ -2,7 +2,13 @@ package cn.sdutcs.mqtt.broker.protocol;
 
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.internal.InternalCommunication;
-import cn.sdutcs.mqtt.broker.service.*;
+import cn.sdutcs.mqtt.common.auth.IAuthService;
+import cn.sdutcs.mqtt.common.message.IDupPubRelMessageStoreService;
+import cn.sdutcs.mqtt.common.message.IDupPublishMessageStoreService;
+import cn.sdutcs.mqtt.common.message.IMessageIdService;
+import cn.sdutcs.mqtt.common.message.IRetainMessageStoreService;
+import cn.sdutcs.mqtt.common.session.ISessionStoreService;
+import cn.sdutcs.mqtt.common.subscribe.ISubscribeStoreService;
 import io.netty.channel.ChannelId;
 import io.netty.channel.group.ChannelGroup;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,41 +25,37 @@ public class ProtocolProcess {
 
     @Autowired
     private BrokerConfig brokerProperties;
-
     @Autowired
     private ChannelGroup channelGroup;
-
     @Autowired
     private ConcurrentHashMap<String, ChannelId> channelIdMap;
 
+    @Autowired
     private IAuthService authService;
+    @Autowired
     private ISessionStoreService sessionStoreService;
+    @Autowired
     private IMessageIdService messageIdService;
+    @Autowired
     private IRetainMessageStoreService retainMessageStoreService;
+    @Autowired
     private ISubscribeStoreService subscribeStoreService;
+    @Autowired
     private IDupPublishMessageStoreService dupPublishMessageStoreService;
+    @Autowired
     private IDupPubRelMessageStoreService dupPubRelMessageStoreService;
-
+    @Autowired
     private InternalCommunication internalCommunication;
 
     private Connect connect;
-
     private Subscribe subscribe;
-
     private UnSubscribe unSubscribe;
-
     private Publish publish;
-
     private DisConnect disConnect;
-
     private PingReq pingReq;
-
     private PubRel pubRel;
-
     private PubAck pubAck;
-
     private PubRec pubRec;
-
     private PubComp pubComp;
 
     public Connect connect() {

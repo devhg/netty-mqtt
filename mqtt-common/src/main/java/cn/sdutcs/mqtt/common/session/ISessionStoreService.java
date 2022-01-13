@@ -1,4 +1,4 @@
-package cn.sdutcs.mqtt.broker.service;
+package cn.sdutcs.mqtt.common.session;
 
 /**
  * 会话存储服务接口

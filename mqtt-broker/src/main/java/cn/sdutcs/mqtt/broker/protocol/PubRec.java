@@ -1,8 +1,8 @@
 package cn.sdutcs.mqtt.broker.protocol;
 
-import cn.sdutcs.mqtt.broker.service.DupPubRelMessageStore;
-import cn.sdutcs.mqtt.broker.service.IDupPubRelMessageStoreService;
-import cn.sdutcs.mqtt.broker.service.IDupPublishMessageStoreService;
+import cn.sdutcs.mqtt.common.message.DupPubRelMessageStore;
+import cn.sdutcs.mqtt.common.message.IDupPubRelMessageStoreService;
+import cn.sdutcs.mqtt.common.message.IDupPublishMessageStoreService;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.*;
 import io.netty.util.AttributeKey;

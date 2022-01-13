@@ -16,4 +16,12 @@
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
+    <dependencies>
+        <!-- 抽象接口模块 -->
+        <dependency>
+            <groupId>cn.sdutcs</groupId>
+            <artifactId>mqtt-common</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>

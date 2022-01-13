@@ -1,4 +1,4 @@
-package cn.sdutcs.mqtt.broker.service;
+package cn.sdutcs.mqtt.common.auth;
 
 /**
  * 用户和密码认证服务接口

@@ -13,11 +13,117 @@
         <module>mqtt-broker</module>
         <module>mqtt-auth</module>
         <module>mqtt-common</module>
+        <module>mqtt-store</module>
     </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!--        <spring.version>4.3.0.RELEASE</spring.version>-->
+        <spring.version>5.1.8.RELEASE</spring.version>
+        <spring-boot.version>2.1.6.RELEASE</spring-boot.version>
+        <netty-all.version>4.1.42.Final</netty-all.version>
+        <logback.version>1.1.7</logback.version>
+        <lombok.version>1.16.12</lombok.version>
+        <hutool.version>4.1.2</hutool.version>
+        <kafka_2.12.version>2.0.0</kafka_2.12.version>
+        <netty-mqtt.version>1.0-SNAPSHOT</netty-mqtt.version>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-crypto</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-configuration-processor</artifactId>
+                <version>${spring-boot.version}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot</artifactId>
+                <version>${spring-boot.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-autoconfigure</artifactId>
+                <version>${spring-boot.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <!-- netty -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty-all.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <!-- 阿里巴巴fastjson -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.35</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>3.1.0</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka_2.12</artifactId>
+                <version>2.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <scope>test</scope>
+                <version>4.10</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+
+            <!-- 子模块 -->
+            <dependency>
+                <groupId>cn.sdutcs</groupId>
+                <artifactId>mqtt-common</artifactId>
+                <version>${netty-mqtt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.sdutcs</groupId>
+                <artifactId>mqtt-store</artifactId>
+                <version>${netty-mqtt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.sdutcs</groupId>
+                <artifactId>mqtt-auth</artifactId>
+                <version>${netty-mqtt.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>
