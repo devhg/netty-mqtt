@@ -7,6 +7,7 @@ import cn.hutool.crypto.asymmetric.RSA;
 import cn.sdutcs.mqtt.common.auth.IAuthService;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.security.interfaces.RSAPrivateKey;
 
 /**
@@ -26,6 +27,7 @@ public class AuthService implements IAuthService {
         return value.equals(password);
     }
 
+    @PostConstruct
     public void init() {
         privateKey = IoUtil.readObj(AuthService.class.getClassLoader().getResourceAsStream("keystore/auth-private.key"));
     }

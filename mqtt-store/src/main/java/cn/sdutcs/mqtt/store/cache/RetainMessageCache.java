@@ -3,9 +3,12 @@ package cn.sdutcs.mqtt.store.cache;
 import cn.sdutcs.mqtt.common.message.RetainMessageStore;
 import cn.sdutcs.mqtt.store.utils.Util;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import redis.clients.jedis.*;
+import redis.clients.jedis.params.ScanParams;
+import redis.clients.jedis.resps.ScanResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +18,9 @@ import java.util.Map;
 @Repository
 public class RetainMessageCache {
     private final static String CACHE_PRE = "mqtt:retain:";
-    private Jedis redisService;
+
+    @Autowired
+    private JedisPooled redisService;
     // private JedisAgent jedisAgent;
 
     public RetainMessageStore put(String topic, RetainMessageStore obj) {

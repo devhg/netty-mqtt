@@ -18,7 +18,6 @@ public class RsaKeyUtil {
 	 * 生成私钥文件
 	 */
 	public static void main(String[] args) {
-		System.out.println();
 		System.out.print("输入保存密钥文件的路径(如: D:/keystore/ ): ");
 		Scanner scanner = new Scanner(System.in);
 		String path = scanner.nextLine();

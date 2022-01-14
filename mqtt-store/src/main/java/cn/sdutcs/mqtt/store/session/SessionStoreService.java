@@ -9,9 +9,11 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPooled;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -26,7 +28,8 @@ public class SessionStoreService implements ISessionStoreService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionStoreService.class);
     private final static String CACHE_PRE = "mqtt:session:";
 
-    private Jedis redisService;
+    @Autowired
+    private JedisPooled redisService;
 
     @Override
     public void put(String clientId, SessionStore sessionStore, int expire) {

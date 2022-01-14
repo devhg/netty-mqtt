@@ -2,9 +2,9 @@ package cn.sdutcs.mqtt.store.cache;
 
 import cn.sdutcs.mqtt.common.message.DupPublishMessageStore;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPooled;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DupPublishMessageCache {
     private final static String CACHE_PRE = "mqtt:publish:";
 
-    private Jedis redisService;
+    @Autowired
+    private JedisPooled redisService;
 
     public DupPublishMessageStore put(String clientId, Integer messageId, DupPublishMessageStore dupPublishMessageStore) {
         redisService.hset(CACHE_PRE + clientId, String.valueOf(messageId), JSONObject.toJSONString(dupPublishMessageStore));
