@@ -21,7 +21,6 @@ public class RetainMessageCache {
 
     @Autowired
     private JedisPooled redisService;
-    // private JedisAgent jedisAgent;
 
     public RetainMessageStore put(String topic, RetainMessageStore obj) {
         redisService.set(CACHE_PRE + topic, JSONObject.toJSONString(obj));

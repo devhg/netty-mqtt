@@ -14,7 +14,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class RedisCluster {
-    // private static final Logger LOGGER = LoggerFactory.getLogger(RedisCluster.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisCluster.class);
+
     // private static final String CLUSTER_TOPIC = "mqttwk:cluster";
     // private BrokerConfig brokerProperties;
     // private InternalSendServer internalSendServer;
@@ -33,6 +34,7 @@ public class RedisCluster {
     //
     public void sendMessage(InternalMessage internalMessage) {
         // pubSubService.fire(CLUSTER_TOPIC, JSONObject.toJSONString(internalMessage));
+        LOGGER.info("{} -> {}", "CLUSTER_TOPIC", JSONObject.toJSONString(internalMessage));
     }
 
 }

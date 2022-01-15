@@ -2,6 +2,8 @@ package cn.sdutcs.mqtt.store.cache;
 
 import cn.sdutcs.mqtt.common.subscribe.SubscribeStore;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
@@ -15,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 精确Topic
+ */
 @Repository
 public class SubscribeNotWildcardCache {
     private final static String CACHE_PRE = "mqtt:subnotwildcard:";
@@ -24,8 +29,13 @@ public class SubscribeNotWildcardCache {
     private JedisPooled redisService;
     // private JedisAgent jedisAgent;
 
+    /**
+     * Topic订阅
+     */
     public SubscribeStore put(String topic, String clientId, SubscribeStore subscribeStore) {
+        // 此topic的哈希表，存入各个 clientId => subscribeStore 映射
         redisService.hset(CACHE_PRE + topic, clientId, JSONObject.toJSONString(subscribeStore));
+        // 当前客户端clientId 已经订阅的 topic集合
         redisService.sadd(CACHE_CLIENT_PRE + clientId, topic);
         return subscribeStore;
     }
@@ -34,15 +44,24 @@ public class SubscribeNotWildcardCache {
         return JSONObject.parseObject(redisService.hget(CACHE_PRE + topic, clientId), SubscribeStore.class);
     }
 
+    /**
+     * 判断此客户端是订阅此topic
+     */
     public boolean containsKey(String topic, String clientId) {
         return redisService.hexists(CACHE_PRE + topic, clientId);
     }
 
+    /**
+     * Topic取消订阅
+     */
     public void remove(String topic, String clientId) {
         redisService.srem(CACHE_CLIENT_PRE + clientId, topic);
         redisService.hdel(CACHE_PRE + topic, clientId);
     }
 
+    /**
+     * Client取消所有订阅
+     */
     public void removeForClient(String clientId) {
         for (String topic : redisService.smembers(CACHE_CLIENT_PRE + clientId)) {
             redisService.hdel(CACHE_PRE + topic, clientId);

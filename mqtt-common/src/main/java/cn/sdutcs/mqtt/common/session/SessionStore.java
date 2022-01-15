@@ -153,6 +153,6 @@ public class SessionStore implements Serializable {
 
         sessionStore.setChannelId(clientId).setChannelId(channelId).setCleanSession(cleanSession).
                 setBrokerId(brokerId).setExpire(expire);
-        return null;
+        return sessionStore;
     }
 }

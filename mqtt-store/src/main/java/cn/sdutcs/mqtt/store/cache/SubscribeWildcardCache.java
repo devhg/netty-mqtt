@@ -15,10 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 模糊topic
+ */
 @Repository
 public class SubscribeWildcardCache {
     private final static String CACHE_PRE = "mqtt:subwildcard:";
     private final static String CACHE_CLIENT_PRE = "mqtt:client:";
+
     @Autowired
     private JedisPooled redisService;
     // private JedisAgent jedisAgent;

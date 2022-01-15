@@ -5,6 +5,8 @@ import cn.sdutcs.mqtt.common.subscribe.ISubscribeStoreService;
 import cn.sdutcs.mqtt.common.subscribe.SubscribeStore;
 import cn.sdutcs.mqtt.store.cache.SubscribeNotWildcardCache;
 import cn.sdutcs.mqtt.store.cache.SubscribeWildcardCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,8 @@ import java.util.List;
 @Service
 public class SubscribeStoreService implements ISubscribeStoreService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscribeStoreService.class);
+
     @Autowired
     private SubscribeNotWildcardCache subscribeNotWildcardCache;
     @Autowired
@@ -30,6 +34,7 @@ public class SubscribeStoreService implements ISubscribeStoreService {
         } else {
             subscribeNotWildcardCache.put(topicFilter, subscribeStore.getClientId(), subscribeStore);
         }
+        LOGGER.info("{} subscribe {} success", subscribeStore.getClientId(), topicFilter);
     }
 
     @Override
@@ -39,12 +44,14 @@ public class SubscribeStoreService implements ISubscribeStoreService {
         } else {
             subscribeNotWildcardCache.remove(topicFilter, clientId);
         }
+        LOGGER.info("{} unsubscribe {} success", clientId, topicFilter);
     }
 
     @Override
     public void removeForClient(String clientId) {
         subscribeNotWildcardCache.removeForClient(clientId);
         subscribeWildcardCache.removeForClient(clientId);
+        LOGGER.info("{} unsubscribe all topics success", clientId);
     }
 
     @Override
@@ -55,29 +62,30 @@ public class SubscribeStoreService implements ISubscribeStoreService {
             subscribeStores.addAll(list);
         }
         subscribeWildcardCache.all().forEach((topicFilter, map) -> {
-            if (StrUtil.split(topic, '/').size() >= StrUtil.split(topicFilter, '/').size()) {
-                List<String> splitTopics = StrUtil.split(topic, '/');//a
-                List<String> spliteTopicFilters = StrUtil.split(topicFilter, '/');//#
-                String newTopicFilter = "";
-                for (int i = 0; i < spliteTopicFilters.size(); i++) {
-                    String value = spliteTopicFilters.get(i);
+            List<String> topicEle = StrUtil.split(topic, '/');
+            List<String> filterEle = StrUtil.split(topicFilter, '/');
+            if (topicEle.size() >= filterEle.size()) {
+                // 对topic重置替换，如果和topicFilter相同，则证明match
+                String expected = "";
+                for (int i = 0; i < filterEle.size(); i++) {
+                    String value = filterEle.get(i);
                     if (value.equals("+")) {
-                        newTopicFilter = newTopicFilter + "+/";
+                        expected = expected + "+/";
                     } else if (value.equals("#")) {
-                        newTopicFilter = newTopicFilter + "#/";
+                        expected = expected + "#/";
                         break;
                     } else {
-                        newTopicFilter = newTopicFilter + splitTopics.get(i) + "/";
+                        expected = expected + topicEle.get(i) + "/";
                     }
                 }
-                newTopicFilter = StrUtil.removeSuffix(newTopicFilter, "/");
-                if (topicFilter.equals(newTopicFilter)) {
-                    Collection<SubscribeStore> collection = map.values();
-                    List<SubscribeStore> list2 = new ArrayList<SubscribeStore>(collection);
-                    subscribeStores.addAll(list2);
+                expected = StrUtil.removeSuffix(expected, "/");
+                if (topicFilter.equals(expected)) {
+                    // List<SubscribeStore> list2 = new ArrayList<SubscribeStore>(map.values());
+                    subscribeStores.addAll(map.values());
                 }
             }
         });
+        LOGGER.info("topic={} SubscribeStores {}", topic, subscribeStores);
         return subscribeStores;
     }
 }

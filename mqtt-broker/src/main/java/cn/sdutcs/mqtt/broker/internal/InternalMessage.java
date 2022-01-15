@@ -95,4 +95,17 @@ public class InternalMessage implements Serializable {
         this.dup = dup;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "InternalMessage{" +
+                "brokerId='" + brokerId + '\'' +
+                ", processId='" + processId + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", topic='" + topic + '\'' +
+                ", mqttQoS=" + mqttQoS +
+                ", retain=" + retain +
+                ", dup=" + dup +
+                '}';
+    }
 }

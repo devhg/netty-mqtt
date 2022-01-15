@@ -3,15 +3,18 @@ package cn.sdutcs.mqtt.store.message;
 import cn.sdutcs.mqtt.common.message.IMessageIdService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPooled;
+
+import javax.annotation.PostConstruct;
 
 @Service
 public class MessageIdService implements IMessageIdService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageIdService.class);
 
-    // todo inject
-    private Jedis redisService;
+    @Autowired
+    private JedisPooled redisService;
 
     @Override
     public int getNextMessageId() {
@@ -31,6 +34,7 @@ public class MessageIdService implements IMessageIdService {
     /**
      * 每次重启的时候重新初始化
      */
+    @PostConstruct
     public void init() {
         redisService.del("mqtt:messageid:num");
     }

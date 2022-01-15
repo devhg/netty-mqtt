@@ -15,6 +15,9 @@ public class SubscribeStore implements Serializable {
 
     private int mqttQoS;
 
+    public SubscribeStore() {
+    }
+
     public SubscribeStore(String clientId, String topicFilter, int mqttQoS) {
         this.clientId = clientId;
         this.topicFilter = topicFilter;
@@ -46,5 +49,14 @@ public class SubscribeStore implements Serializable {
     public SubscribeStore setMqttQoS(int mqttQoS) {
         this.mqttQoS = mqttQoS;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "SubscribeStore{" +
+                "clientId='" + clientId + '\'' +
+                ", topicFilter='" + topicFilter + '\'' +
+                ", mqttQoS=" + mqttQoS +
+                '}';
     }
 }

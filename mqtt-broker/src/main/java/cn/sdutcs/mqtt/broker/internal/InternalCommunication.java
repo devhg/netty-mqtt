@@ -38,5 +38,7 @@ public class InternalCommunication {
         if (brokerProperties.isClusterEnabled()) {
             redisCluster.sendMessage(internalMessage);
         }
+
+        LOGGER.info("消息转发 {}", internalMessage);
     }
 }
