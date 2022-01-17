@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PubRec {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PubRel.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PubRec.class);
 
     private final IDupPublishMessageStoreService dupPublishMessageStoreService;
     private final IDupPubRelMessageStoreService dupPubRelMessageStoreService;
@@ -30,16 +30,18 @@ public class PubRec {
         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
         int messageId = variableHeader.messageId();
 
-        // 1. 删掉 PublishMessage
+        // 1. 删掉 dupPublishMessage，存储 dupPubRelMessage
         dupPublishMessageStoreService.remove(clientId, messageId);
-        LOGGER.debug("PUBREC - clientId: {}, messageId: {}", clientId, messageId);
+        DupPubRelMessageStore dupPubRelMessage = new DupPubRelMessageStore(clientId, messageId);
+        dupPubRelMessageStoreService.put(clientId, dupPubRelMessage);
+
+        LOGGER.info("PUBREC - clientId: {}, messageId: {}", clientId, messageId);
+
         // 2. 发送 PubRelMessage
         MqttMessage pubRelMessage = MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.PUBREL, false, MqttQoS.AT_MOST_ONCE, false, 0),
                 MqttMessageIdVariableHeader.from(messageId),
                 null);
-        DupPubRelMessageStore dupPubRelMessage = new DupPubRelMessageStore(clientId, messageId);
-        dupPubRelMessageStoreService.put(clientId, dupPubRelMessage);
-        channel.writeAndFlush(dupPubRelMessage);
+        channel.writeAndFlush(pubRelMessage);
     }
 }

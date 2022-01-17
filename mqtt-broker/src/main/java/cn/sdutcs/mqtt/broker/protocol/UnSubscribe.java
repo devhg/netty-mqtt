@@ -27,7 +27,7 @@ public class UnSubscribe {
         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
         topicFilters.forEach(topicFilter -> {
             subscribeStoreService.remove(topicFilter, clientId);
-            LOGGER.debug("UNSUBSCRIBE - clientId: {}, topicFilter: {}", clientId, topicFilter);
+            LOGGER.info("UNSUBSCRIBE - clientId: {}, topicFilter: {}", clientId, topicFilter);
         });
         MqttUnsubAckMessage unsubAckMessage = (MqttUnsubAckMessage) MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.UNSUBACK, false, MqttQoS.AT_MOST_ONCE, false, 0),

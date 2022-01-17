@@ -23,7 +23,7 @@ public class PubComp {
     public void processPubComp(Channel channel, MqttMessageIdVariableHeader variableHeader) {
         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
         int messageId = variableHeader.messageId();
-        LOGGER.debug("PUBCOMP - clientId: {}, messageId: {}", clientId, messageId);
         dupPubRelMessageStoreService.remove(clientId, messageId);
+        LOGGER.info("PUBCOMP - clientId: {}, messageId: {}", clientId, messageId);
     }
 }

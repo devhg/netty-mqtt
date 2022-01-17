@@ -20,7 +20,7 @@ public class PubRel {
                 new MqttFixedHeader(MqttMessageType.PUBCOMP, false, MqttQoS.AT_MOST_ONCE, false, 0),
                 MqttMessageIdVariableHeader.from(messageId),
                 null);
-        LOGGER.debug("PUBREL - clientId: {}, messageId: {}", clientId, messageId);
+        LOGGER.info("PUBREL - clientId: {}, messageId: {}", clientId, messageId);
         channel.writeAndFlush(pubCompMessage);
     }
 }

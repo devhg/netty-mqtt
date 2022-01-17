@@ -23,7 +23,7 @@ public class PubAck {
     public void processPubAck(Channel channel, MqttMessageIdVariableHeader variableHeader) {
         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
         int messageId = variableHeader.messageId();
-        LOGGER.debug("PUBACK - clientId: {}, messageId: {}", clientId, messageId);
+        LOGGER.info("PUBACK - clientId: {}, messageId: {}", clientId, messageId);
         dupPublishMessageStoreService.remove(clientId, messageId);
     }
 }

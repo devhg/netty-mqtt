@@ -60,6 +60,8 @@ public class Connect {
     }
 
     public void processConnect(Channel channel, MqttConnectMessage msg) throws UnsupportedEncodingException {
+        LOGGER.info("CONNECT - from clientId: {}, cleanSession: {}", msg.payload().clientIdentifier(), msg.variableHeader().isCleanSession());
+
         if (msg.decoderResult().isFailure()) {
             Throwable cause = msg.decoderResult().cause();
             if (cause instanceof MqttUnacceptableProtocolVersionException) {
@@ -111,6 +113,7 @@ public class Connect {
         String clientId = msg.payload().clientIdentifier();
         if (sessionStoreService.containsKey(clientId)) {
             SessionStore sessionStore = sessionStoreService.get(clientId);
+            // 全新的会话
             if (sessionStore.isCleanSession()) {
                 sessionStoreService.remove(clientId);
                 subscribeStoreService.removeForClient(clientId);
@@ -134,7 +137,7 @@ public class Connect {
             dupPubRelMessageStoreService.removeByClient(clientId);
         }
 
-        // 处理连接心跳包，用客户端请求中设置的keepAliveTimeSeconds替换BrokerServer预配置的
+        // 处理连接心跳包，连接alive时间，用客户端请求中设置的keepAliveTimeSeconds替换BrokerServer预配置的
         int expire = 0;
         if (msg.variableHeader().keepAliveTimeSeconds() > 0) {
             if (channel.pipeline().names().contains("idle")) {
@@ -164,13 +167,15 @@ public class Connect {
         MqttConnAckMessage okResp = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                 new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_ACCEPTED, sessionPresent), null);
-        channel.writeAndFlush(okResp);
-        LOGGER.debug("CONNECT - clientId: {}, cleanSession: {}", clientId, msg.variableHeader().isCleanSession());
 
-        // 如果cleanSession为0, 需要重发同一clientId存储的未完成的QoS1和QoS2的DUP消息
+        channel.writeAndFlush(okResp);
+        LOGGER.info("CONNACK - clientId: {}, cleanSession: {} established", clientId, msg.variableHeader().isCleanSession());
+
+        // 如果cleanSession为0则表示复用之前的session, 需要重发此clientId存储的未完成的QoS1和QoS2的DUP消息
         if (!msg.variableHeader().isCleanSession()) {
             List<DupPublishMessageStore> dupPublishMessageStoreList = dupPublishMessageStoreService.get(clientId);
             List<DupPubRelMessageStore> dupPubRelMessageStoreList = dupPubRelMessageStoreService.get(clientId);
+
             dupPublishMessageStoreList.forEach(dupPublishMessageStore -> {
                 MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
                         new MqttFixedHeader(MqttMessageType.PUBLISH, true, MqttQoS.valueOf(dupPublishMessageStore.getMqttQoS()), false, 0),
@@ -178,6 +183,7 @@ public class Connect {
                         Unpooled.buffer().writeBytes(dupPublishMessageStore.getMessageBytes()));
                 channel.writeAndFlush(publishMessage);
             });
+
             dupPubRelMessageStoreList.forEach(dupPubRelMessageStore -> {
                 MqttMessage pubRelMessage = MqttMessageFactory.newMessage(
                         new MqttFixedHeader(MqttMessageType.PUBREL, true, MqttQoS.AT_MOST_ONCE, false, 0),

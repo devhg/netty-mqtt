@@ -13,6 +13,9 @@ public class DupPubRelMessageStore implements Serializable {
 
     private int messageId;
 
+    public DupPubRelMessageStore() {
+    }
+
     public DupPubRelMessageStore(String clientId, int messageId) {
         this.clientId = clientId;
         this.messageId = messageId;
