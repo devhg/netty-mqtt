@@ -62,27 +62,6 @@ public class Connect {
     public void processConnect(Channel channel, MqttConnectMessage msg) throws UnsupportedEncodingException {
         LOGGER.info("CONNECT - from clientId: {}, cleanSession: {}", msg.payload().clientIdentifier(), msg.variableHeader().isCleanSession());
 
-        if (msg.decoderResult().isFailure()) {
-            Throwable cause = msg.decoderResult().cause();
-            if (cause instanceof MqttUnacceptableProtocolVersionException) {
-                // 不支持的协议版本
-                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                        new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                        new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION, false),
-                        null);
-                channel.writeAndFlush(connAckMessage);
-            } else if (cause instanceof MqttIdentifierRejectedException) {
-                // 不合格的clientId
-                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                        new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                        new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false),
-                        null);
-                channel.writeAndFlush(connAckMessage);
-            }
-            channel.close();
-            return;
-        }
-
         // clientId为空或null的情况, 这里要求客户端必须提供clientId, 不管cleanSession是否为1, 此处没有参考标准协议实现
         if (StrUtil.isBlank(msg.payload().clientIdentifier())) {
             MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
@@ -99,6 +78,7 @@ public class Connect {
             String username = msg.payload().userName();
             String password = msg.payload().passwordInBytes() == null ? null : new String(msg.payload().passwordInBytes(), StandardCharsets.UTF_8);
             if (!authService.checkValid(username, password)) {
+                LOGGER.info("user: {} login with failed password", username);
                 MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                         new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                         new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD, false),

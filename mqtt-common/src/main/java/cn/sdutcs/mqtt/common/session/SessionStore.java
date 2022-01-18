@@ -139,9 +139,9 @@ public class SessionStore implements Serializable {
                 MqttPublishMessage mqttPublishMessage = new MqttPublishMessage(mqttFixedHeader, mqttPublishVariableHeader, buf);
                 sessionStore.setWillMessage(mqttPublishMessage);
             } finally {
-                if (buf != null) {
-                    buf.release();
-                }
+                // if (buf != null) {
+                //     buf.release();
+                // }
             }
         }
 

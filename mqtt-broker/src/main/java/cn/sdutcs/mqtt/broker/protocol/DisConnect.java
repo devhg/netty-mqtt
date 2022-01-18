@@ -7,6 +7,7 @@ import cn.sdutcs.mqtt.common.session.SessionStore;
 import cn.sdutcs.mqtt.common.subscribe.ISubscribeStoreService;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttMessage;
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +42,15 @@ public class DisConnect {
             dupPublishMessageStoreService.removeByClient(clientId);
             dupPubRelMessageStoreService.removeByClient(clientId);
         }
-        LOGGER.info("DISCONNECT - clientId: {}, cleanSession: {}", clientId, sessionStore.isCleanSession());
-        sessionStoreService.remove(clientId);
+        if (sessionStore != null) {
+            // 处理遗嘱消息
+            MqttPublishMessage willMessage = sessionStore.getWillMessage();
+            if (willMessage != null) {
+                channel.writeAndFlush(willMessage);
+            }
+            LOGGER.debug("DISCONNECT - clientId: {}, cleanSession: {}", clientId, sessionStore.isCleanSession());
+            sessionStoreService.remove(clientId);
+        }
         channel.close();
     }
 }

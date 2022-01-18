@@ -48,15 +48,19 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
         if (msg.decoderResult().isFailure()) {
             Throwable cause = msg.decoderResult().cause();
             if (cause instanceof MqttUnacceptableProtocolVersionException) {
-                ctx.writeAndFlush(MqttMessageFactory.newMessage(
+                // 不支持的协议版本
+                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                         new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                         new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION, false),
-                        null));
+                        null);
+                ctx.writeAndFlush(connAckMessage);
             } else if (cause instanceof MqttIdentifierRejectedException) {
-                ctx.writeAndFlush(MqttMessageFactory.newMessage(
+                // 不合格的clientId
+                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                         new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                         new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false),
-                        null));
+                        null);
+                ctx.writeAndFlush(connAckMessage);
             }
             ctx.close();
             return;
