@@ -2,6 +2,7 @@ package cn.sdutcs.mqtt.broker.protocol;
 
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.internal.InternalCommunication;
+import cn.sdutcs.mqtt.broker.internal.MessageSender;
 import cn.sdutcs.mqtt.common.auth.IAuthService;
 import cn.sdutcs.mqtt.common.message.IDupPubRelMessageStoreService;
 import cn.sdutcs.mqtt.common.message.IDupPublishMessageStoreService;
@@ -46,6 +47,8 @@ public class ProtocolProcess {
     private IDupPubRelMessageStoreService dupPubRelMessageStoreService;
     @Autowired
     private InternalCommunication internalCommunication;
+    @Autowired
+    private MessageSender messageSender;
 
     private Connect connect;
     private Subscribe subscribe;
@@ -84,17 +87,19 @@ public class ProtocolProcess {
     public Publish publish() {
         if (publish == null) {
             publish = new Publish(
-                    brokerProperties, channelIdMap, channelGroup,
-                    internalCommunication, sessionStoreService, subscribeStoreService, messageIdService,
-                    retainMessageStoreService, dupPublishMessageStoreService);
+                    brokerProperties, channelIdMap,
+                    internalCommunication, messageSender, sessionStoreService,
+                    retainMessageStoreService);
         }
         return publish;
     }
 
     public DisConnect disConnect() {
         if (disConnect == null) {
-            disConnect = new DisConnect(sessionStoreService, subscribeStoreService,
-                    dupPublishMessageStoreService, dupPubRelMessageStoreService);
+            disConnect = new DisConnect(
+                    sessionStoreService, subscribeStoreService,
+                    dupPublishMessageStoreService, dupPubRelMessageStoreService,
+                    messageSender);
         }
         return disConnect;
     }
