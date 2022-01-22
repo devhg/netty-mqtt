@@ -2,13 +2,19 @@ package cn.sdutcs.mqtt.broker.handler;
 
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.protocol.ProtocolProcess;
+import cn.sdutcs.mqtt.broker.server.BrokerServer;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
+import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.mqtt.*;
+import io.netty.handler.ssl.NotSslRecordException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -17,6 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @ChannelHandler.Sharable
 public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BrokerHandler.class);
+
     @Autowired
     private ProtocolProcess protocolProcess;
 
@@ -114,6 +123,17 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         if (cause instanceof IOException) {
             // 远程主机强迫关闭了一个现有的连接的异常
+            ctx.close();
+        } else if (cause instanceof DecoderException) {
+            if (cause.getCause() instanceof NotSslRecordException) {
+                // 未通过SSL认证
+                // MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
+                //         new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
+                //         new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE, false),
+                //         null);
+                // ctx.writeAndFlush(connAckMessage);
+                LOGGER.error("SSL verify ERROR");
+            }
             ctx.close();
         } else {
             super.exceptionCaught(ctx, cause);

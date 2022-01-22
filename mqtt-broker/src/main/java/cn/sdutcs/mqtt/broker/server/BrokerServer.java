@@ -41,8 +41,6 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLEngine;
 import java.io.InputStream;
 import java.security.KeyStore;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -83,7 +81,7 @@ public class BrokerServer implements Lifecycle {
         // 开启SSL
         if (brokerProperties.getSslEnabled()) {
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("keystore/server.pfx");
+            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("keystore/server.p12");
             keyStore.load(inputStream, brokerProperties.getSslPassword().toCharArray());
             KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
             kmf.init(keyStore, brokerProperties.getSslPassword().toCharArray());
@@ -116,8 +114,10 @@ public class BrokerServer implements Lifecycle {
         workerGroup = null;
         channel.closeFuture().syncUninterruptibly();
         channel = null;
-        websocketChannel.closeFuture().syncUninterruptibly();
-        websocketChannel = null;
+        if (brokerProperties.getWsEnabled()) {
+            websocketChannel.closeFuture().syncUninterruptibly();
+            websocketChannel = null;
+        }
         running = false;
         logger.info("MQTT Broker {} shutdown finish.", "[" + brokerProperties.getId() + "]");
     }
