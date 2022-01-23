@@ -5,13 +5,13 @@ import cn.sdutcs.mqtt.common.subscribe.ISubscribeStoreService;
 import cn.sdutcs.mqtt.common.subscribe.SubscribeStore;
 import cn.sdutcs.mqtt.store.cache.SubscribeNotWildcardCache;
 import cn.sdutcs.mqtt.store.cache.SubscribeWildcardCache;
+import cn.sdutcs.mqtt.store.utils.TopicMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -57,33 +57,18 @@ public class SubscribeStoreService implements ISubscribeStoreService {
     @Override
     public List<SubscribeStore> search(String topic) {
         List<SubscribeStore> subscribeStores = new ArrayList<SubscribeStore>();
-        List<SubscribeStore> list = subscribeNotWildcardCache.all(topic);
-        if (list.size() > 0) {
-            subscribeStores.addAll(list);
+        List<SubscribeStore> notWildSubscribeStores = subscribeNotWildcardCache.all(topic);
+        if (notWildSubscribeStores.size() > 0) {
+            subscribeStores.addAll(notWildSubscribeStores);
         }
         subscribeWildcardCache.all().forEach((topicFilter, map) -> {
             List<String> topicEle = StrUtil.split(topic, '/');
             List<String> filterEle = StrUtil.split(topicFilter, '/');
-            if (topicEle.size() >= filterEle.size()) {
-                // 对topic重置替换，如果和topicFilter相同，则证明match
-                String expected = "";
-                for (int i = 0; i < filterEle.size(); i++) {
-                    String value = filterEle.get(i);
-                    if (value.equals("+")) {
-                        expected = expected + "+/";
-                    } else if (value.equals("#")) {
-                        expected = expected + "#/";
-                        break;
-                    } else {
-                        expected = expected + topicEle.get(i) + "/";
-                    }
-                }
-                expected = StrUtil.removeSuffix(expected, "/");
-                if (topicFilter.equals(expected)) {
-                    // List<SubscribeStore> list2 = new ArrayList<SubscribeStore>(map.values());
-                    subscribeStores.addAll(map.values());
-                }
+            if (TopicMatcher.match(topicFilter, topic)) {
+                // List<SubscribeStore> list2 = new ArrayList<SubscribeStore>(map.values());
+                subscribeStores.addAll(map.values());
             }
+
         });
         LOGGER.info("topic={} SubscribeStores {}", topic, subscribeStores);
         return subscribeStores;

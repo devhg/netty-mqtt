@@ -1,19 +1,15 @@
 package cn.sdutcs.mqtt.store.cache;
 
 import cn.sdutcs.mqtt.common.message.RetainMessageStore;
-import cn.sdutcs.mqtt.store.utils.Util;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import redis.clients.jedis.*;
 import redis.clients.jedis.params.ScanParams;
 import redis.clients.jedis.resps.ScanResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class RetainMessageCache {
@@ -39,8 +35,10 @@ public class RetainMessageCache {
         redisService.del(CACHE_PRE + topic);
     }
 
-    public Map<String, RetainMessageStore> all() {
-        Map<String, RetainMessageStore> map = new HashMap<>();
+    /**
+     * 获取全部key(topic)
+     */
+    public List<String> keys() {
         ScanParams match = new ScanParams().match(CACHE_PRE + "*");
         List<String> keys = new ArrayList<>();
         if (false /*jedisAgent.isClusterMode()*/) {
@@ -67,9 +65,8 @@ public class RetainMessageCache {
                 // Util.safeClose(jedis);
             }
         }
-        for (String key : keys) {
-            map.put(key.substring(CACHE_PRE.length()), JSONObject.parseObject(redisService.get(key), RetainMessageStore.class));
-        }
-        return map;
+        return keys.stream().map((key) -> {
+            return key.substring(CACHE_PRE.length());
+        }).collect(Collectors.toList());
     }
 }
