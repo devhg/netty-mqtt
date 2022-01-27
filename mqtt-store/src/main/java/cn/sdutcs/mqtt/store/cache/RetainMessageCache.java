@@ -16,7 +16,7 @@ public class RetainMessageCache {
     private final static String CACHE_PRE = "mqtt:retain:";
 
     @Autowired
-    private JedisPooled redisService;
+    private UnifiedJedis redisService;
 
     public RetainMessageStore put(String topic, RetainMessageStore obj) {
         redisService.set(CACHE_PRE + topic, JSONObject.toJSONString(obj));
@@ -53,9 +53,7 @@ public class RetainMessageCache {
             //     }
             // }
         } else {
-            // Jedis jedis = null;
             try {
-                // jedis = jedisAgent.jedis();
                 ScanResult<String> scan = null;
                 do {
                     scan = redisService.scan(scan == null ? ScanParams.SCAN_POINTER_START : scan.getCursor(), match);

@@ -3,7 +3,6 @@ package cn.sdutcs.mqtt.store.cache;
 import cn.sdutcs.mqtt.common.subscribe.SubscribeStore;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import redis.clients.jedis.*;
 import redis.clients.jedis.params.ScanParams;
@@ -24,7 +23,7 @@ public class SubscribeWildcardCache {
     private final static String CACHE_CLIENT_PRE = "mqtt:client:";
 
     @Autowired
-    private JedisPooled redisService;
+    private UnifiedJedis redisService;
     // private JedisAgent jedisAgent;
 
     public SubscribeStore put(String topic, String clientId, SubscribeStore subscribeStore) {

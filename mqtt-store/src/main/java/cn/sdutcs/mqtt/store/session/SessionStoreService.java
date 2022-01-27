@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPooled;
+import redis.clients.jedis.UnifiedJedis;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class SessionStoreService implements ISessionStoreService {
     private final static String CACHE_PRE = "mqtt:session:";
 
     @Autowired
-    private JedisPooled redisService;
+    private UnifiedJedis redisService;
 
     @Override
     public void put(String clientId, SessionStore sessionStore, int expire) {

@@ -26,7 +26,7 @@ public class SubscribeNotWildcardCache {
     private final static String CACHE_CLIENT_PRE = "mqtt:client:";
 
     @Autowired
-    private JedisPooled redisService;
+    private UnifiedJedis redisService;
     // private JedisAgent jedisAgent;
 
     /**

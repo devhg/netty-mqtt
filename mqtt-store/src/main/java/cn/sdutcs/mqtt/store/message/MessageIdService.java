@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import redis.clients.jedis.JedisPooled;
+import redis.clients.jedis.UnifiedJedis;
 
 import javax.annotation.PostConstruct;
 
@@ -14,7 +14,7 @@ public class MessageIdService implements IMessageIdService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageIdService.class);
 
     @Autowired
-    private JedisPooled redisService;
+    private UnifiedJedis redisService;
 
     @Override
     public int getNextMessageId() {
@@ -36,6 +36,8 @@ public class MessageIdService implements IMessageIdService {
      */
     @PostConstruct
     public void init() {
-        redisService.del("mqtt:messageid:num");
+        if (redisService.exists("mqtt:messageid:num")) {
+            redisService.del("mqtt:messageid:num");
+        }
     }
 }

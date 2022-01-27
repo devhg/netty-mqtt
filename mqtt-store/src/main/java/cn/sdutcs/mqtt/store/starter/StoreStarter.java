@@ -5,11 +5,11 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import redis.clients.jedis.JedisPooled;
+import redis.clients.jedis.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.Properties;
+import java.util.*;
 
 @Component
 // @EnableConfigurationProperties({StoreStarter.class})
@@ -17,7 +17,7 @@ import java.util.Properties;
 @Data
 public class StoreStarter {
     protected KafkaProducer kafkaProducer;
-    protected JedisPooled jedis;
+    protected UnifiedJedis jedis;
 
     // @PropDoc(group = "broker", value = "实例名称", need = true, defaultValue = "mqtt")
     @Value("${mqtt.broker.id}")
@@ -83,6 +83,10 @@ public class StoreStarter {
     private Integer redisPoolMaxIdle;
     @Value("${redis.pool.minIdle}")
     private Integer redisPoolMInIdle;
+    @Value("${redis.mode}")
+    private String redisMode;
+    @Value("${redis.nodes}")
+    private String redisEndpoints;
 
     public Properties getProperties() {
         Properties properties = new Properties();
@@ -103,7 +107,7 @@ public class StoreStarter {
     }
 
     @Bean
-    public JedisPooled jedisPooled() {
+    public UnifiedJedis jedisPooled() {
         return this.jedis;
     }
 
@@ -113,7 +117,16 @@ public class StoreStarter {
             this.kafkaProducer = new KafkaProducer(getProperties());
         }
         if (redisEnabled) {
-            this.jedis = new JedisPooled(redisHost, redisPort);
+            if (redisMode.equals("normal")) {
+                this.jedis = new JedisPooled(redisHost, redisPort);
+            } else if (redisMode.equals("cluster")) {
+                Set<HostAndPort> jedisClusterNodes = new HashSet<HostAndPort>();
+                String[] nodes = redisEndpoints.split(",");
+                Arrays.stream(nodes).forEach((addr) -> {
+                    jedisClusterNodes.add(HostAndPort.from(addr));
+                });
+                this.jedis = new JedisCluster(jedisClusterNodes);
+            }
         }
     }
 

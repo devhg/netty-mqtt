@@ -12,8 +12,8 @@
 - [x] MQTT连接认证(可选择是否开启)
 - [x] SSL方式连接(可选择是否开启)
 - [x] 主题过滤(支持单主题订阅如 test_topic /mqtt/test --不能以/结尾, 通配符订阅 # /mqtt/# --以#结尾)
-- [ ] Websocket支持(可选择是否开启)
-- [ ] 集群功能(可选择是否开启)
+- [x] Websocket支持(可选择是否开启)
+- [x] Redis-Cluster集群功能(可选择是否开启)
 - [ ] Kafka消息转发功能(可选择是否开启)
 - [ ] 启动后查看统计数据 http://127.0.0.1:8922/open/api/mqttwk/info
 

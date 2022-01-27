@@ -1,17 +1,11 @@
 package cn.sdutcs.mqtt.broker.cluster;
 
-import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.internal.InternalMessage;
-import cn.sdutcs.mqtt.broker.internal.InternalSendServer;
 import com.alibaba.fastjson.JSONObject;
-import io.netty.handler.codec.mqtt.MqttQoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-/**
- * Created by wizzer on 2018
- */
 @Component
 public class RedisCluster {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisCluster.class);

@@ -4,7 +4,7 @@ import cn.sdutcs.mqtt.common.message.DupPublishMessageStore;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import redis.clients.jedis.JedisPooled;
+import redis.clients.jedis.UnifiedJedis;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,7 +14,7 @@ public class DupPublishMessageCache {
     private final static String CACHE_PRE = "mqtt:publish:";
 
     @Autowired
-    private JedisPooled redisService;
+    private UnifiedJedis redisService;
 
     public DupPublishMessageStore put(String clientId, Integer messageId, DupPublishMessageStore dupPublishMessageStore) {
         redisService.hset(CACHE_PRE + clientId, String.valueOf(messageId), JSONObject.toJSONString(dupPublishMessageStore));
