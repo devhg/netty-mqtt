@@ -56,29 +56,14 @@ public class SubscribeWildcardCache {
         Map<String, ConcurrentHashMap<String, SubscribeStore>> result = new HashMap<>();
         ScanParams match = new ScanParams().match(CACHE_PRE + "*");
         List<String> keys = new ArrayList<>();
-        if (false/*jedisAgent.isClusterMode()*/) {
-            // JedisCluster jedisCluster = jedisAgent.getJedisClusterWrapper().getJedisCluster();
-            // for (JedisPool pool : jedisCluster.getClusterNodes().values()) {
-            //     try (Jedis jedis = pool.getResource()) {
-            //         ScanResult<String> scan = null;
-            //         do {
-            //             scan = jedis.scan(scan == null ? ScanParams.SCAN_POINTER_START : scan.getStringCursor(), match);
-            //             keys.addAll(scan.getResult());
-            //         } while (!scan.isCompleteIteration());
-            //     }
-            // }
-        } else {
-            // Jedis jedis = null;
-            try {
-                // jedis = jedisAgent.jedis();
-                ScanResult<String> scan = null;
-                do {
-                    scan = redisService.scan(scan == null ? ScanParams.SCAN_POINTER_START : scan.getCursor(), match);
-                    keys.addAll(scan.getResult());
-                } while (!scan.isCompleteIteration());
-            } finally {
-                // Streams.safeClose(jedis);
-            }
+        try {
+            ScanResult<String> scan = null;
+            do {
+                scan = redisService.scan(scan == null ? ScanParams.SCAN_POINTER_START : scan.getCursor(), match);
+                keys.addAll(scan.getResult());
+            } while (!scan.isCompleteIteration());
+        } finally {
+            // Streams.safeClose(jedis);
         }
         for (String key : keys) {
             ConcurrentHashMap<String, SubscribeStore> map1 = new ConcurrentHashMap<>();

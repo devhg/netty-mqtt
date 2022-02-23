@@ -1,6 +1,7 @@
 package cn.sdutcs.mqtt.store.cache;
 
 import cn.sdutcs.mqtt.common.message.RetainMessageStore;
+import cn.sdutcs.mqtt.store.starter.StoreStarter;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -41,27 +42,14 @@ public class RetainMessageCache {
     public List<String> keys() {
         ScanParams match = new ScanParams().match(CACHE_PRE + "*");
         List<String> keys = new ArrayList<>();
-        if (false /*jedisAgent.isClusterMode()*/) {
-            // JedisCluster jedisCluster = jedisAgent.getJedisClusterWrapper().getJedisCluster();
-            // for (JedisPool pool : jedisCluster.getClusterNodes().values()) {
-            //     try (Jedis jedis = pool.getResource()) {
-            //         ScanResult<String> scan = null;
-            //         do {
-            //             scan = jedis.scan(scan == null ? ScanParams.SCAN_POINTER_START : scan.getStringCursor(), match);
-            //             keys.addAll(scan.getResult());
-            //         } while (!scan.isCompleteIteration());
-            //     }
-            // }
-        } else {
-            try {
-                ScanResult<String> scan = null;
-                do {
-                    scan = redisService.scan(scan == null ? ScanParams.SCAN_POINTER_START : scan.getCursor(), match);
-                    keys.addAll(scan.getResult());
-                } while (!scan.isCompleteIteration());
-            } finally {
-                // Util.safeClose(jedis);
-            }
+        try {
+            ScanResult<String> scan = null;
+            do {
+                scan = redisService.scan(scan == null ? ScanParams.SCAN_POINTER_START : scan.getCursor(), match);
+                keys.addAll(scan.getResult());
+            } while (!scan.isCompleteIteration());
+        } finally {
+            // Util.safeClose(jedis);
         }
         return keys.stream().map((key) -> {
             return key.substring(CACHE_PRE.length());

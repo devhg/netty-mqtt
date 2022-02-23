@@ -20,6 +20,9 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
+import io.netty.handler.ipfilter.IpFilterRule;
+import io.netty.handler.ipfilter.IpFilterRuleType;
+import io.netty.handler.ipfilter.IpSubnetFilterRule;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
@@ -40,6 +43,7 @@ import org.springframework.stereotype.Component;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLEngine;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.security.KeyStore;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -65,6 +69,10 @@ public class BrokerServer implements Lifecycle {
 
     private Channel channel;
     private Channel websocketChannel;
+
+    // ip黑名单
+    @Autowired
+    IpFilterRuleHandler ipFilterRuleHandler;
 
     public BrokerServer() {
         channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
@@ -154,9 +162,11 @@ public class BrokerServer implements Lifecycle {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline pipeline = socketChannel.pipeline();
+                        // IP黑名单
+                        pipeline.addLast("ipFilter", ipFilterRuleHandler);
 
                         // Netty提供的心跳检测
-                        pipeline.addFirst("idle", new IdleStateHandler(0, 0, brokerProperties.getKeepAlive()));
+                        pipeline.addFirst("idle", new IdleStateHandler(brokerProperties.getKeepAlive(), 0, 0));
 
                         // Netty提供的SSL处理
                         if (brokerProperties.getSslEnabled()) {
@@ -192,7 +202,7 @@ public class BrokerServer implements Lifecycle {
                         ChannelPipeline pipeline = socketChannel.pipeline();
 
                         // Netty提供的心跳检测
-                        pipeline.addFirst("idle", new IdleStateHandler(0, 0, brokerProperties.getKeepAlive()));
+                        pipeline.addFirst("idle", new IdleStateHandler(brokerProperties.getKeepAlive(), 0, 0));
 
                         // Netty提供的SSL处理
                         if (brokerProperties.getSslEnabled()) {
@@ -207,7 +217,7 @@ public class BrokerServer implements Lifecycle {
                         // 将HTTP消息的多个部分合成一条完整的HTTP消息
                         pipeline.addLast("aggregator", new HttpObjectAggregator(1048576));
                         // 将HTTP消息进行压缩编码
-                        pipeline.addLast("compressor ", new HttpContentCompressor());
+                        pipeline.addLast("compressor", new HttpContentCompressor());
                         pipeline.addLast("protocol", new WebSocketServerProtocolHandler(brokerProperties.getWebsocketPath(), "mqtt,mqttv3.1,mqttv3.1.1", true, 65536));
                         pipeline.addLast("mqttWebSocket", new MqttWebSocketCodec());
                         pipeline.addLast("decoder", new MqttDecoder());

@@ -3,11 +3,15 @@ package cn.sdutcs.mqtt.broker.handler;
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.protocol.ProtocolProcess;
 import cn.sdutcs.mqtt.broker.server.BrokerServer;
+import cn.sdutcs.mqtt.common.session.SessionStore;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.mqtt.*;
 import io.netty.handler.ssl.NotSslRecordException;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,11 +131,11 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
         } else if (cause instanceof DecoderException) {
             if (cause.getCause() instanceof NotSslRecordException) {
                 // 未通过SSL认证
-                // MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                //         new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                //         new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE, false),
-                //         null);
-                // ctx.writeAndFlush(connAckMessage);
+                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
+                        new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
+                        new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE, false),
+                        null);
+                ctx.writeAndFlush(connAckMessage);
                 LOGGER.error("SSL verify ERROR");
             }
             ctx.close();
@@ -140,24 +144,30 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
         }
     }
 
+    /**
+     * 用于心跳超时，处理遗嘱消息
+     */
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        // if (evt instanceof IdleStateEvent) {
-        //     IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
-        //     if (idleStateEvent.state() == IdleState.ALL_IDLE) {
-        //         Channel channel = ctx.channel();
-        //         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
-        //         // 发送遗嘱消息
-        //         if (this.protocolProcess.getSessionStoreService().containsKey(clientId)) {
-        //             SessionStore sessionStore = this.protocolProcess.getSessionStoreService().get(clientId);
-        //             if (sessionStore.getWillMessage() != null) {
-        //                 this.protocolProcess.publish().processPublish(ctx.channel(), sessionStore.getWillMessage());
-        //             }
-        //         }
-        //         ctx.close();
-        //     }
-        // } else {
-        //     super.userEventTriggered(ctx, evt);
-        // }
+        if (evt instanceof IdleStateEvent) {
+
+            System.out.println("成功处理了超时的问题");
+            IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
+            // 读超时
+            if (idleStateEvent.state() == IdleState.READER_IDLE) {
+                Channel channel = ctx.channel();
+                String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
+                // 发送遗嘱消息
+                if (this.protocolProcess.getSessionStoreService().containsKey(clientId)) {
+                    SessionStore sessionStore = this.protocolProcess.getSessionStoreService().get(clientId);
+                    if (sessionStore.getWillMessage() != null) {
+                        this.protocolProcess.publish().processPublish(ctx.channel(), sessionStore.getWillMessage());
+                    }
+                }
+                ctx.close();
+            }
+        } else {
+            super.userEventTriggered(ctx, evt);
+        }
     }
 }

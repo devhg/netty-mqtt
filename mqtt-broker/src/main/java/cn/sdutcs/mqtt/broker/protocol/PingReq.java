@@ -30,13 +30,20 @@ public class PingReq {
     }
 
     public void processPingReq(Channel channel, MqttMessage msg) {
+        System.out.println("收到pingReq报文");
+
         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
         if (sessionStoreService.containsKey(clientId)) {
             SessionStore sessionStore = sessionStoreService.get(clientId);
             ChannelId channelId = channelIdMap.get(sessionStore.getBrokerId() + "_" + sessionStore.getChannelId());
+
+            MqttMessage pingRespMessage = MqttMessageFactory.newMessage(
+                    new MqttFixedHeader(MqttMessageType.PINGRESP, false, MqttQoS.AT_MOST_ONCE, false, 0),
+                    null, null);
             if (brokerProperties.getId().equals(sessionStore.getBrokerId()) && channelId != null) {
                 sessionStoreService.expire(clientId, sessionStore.getExpire());
             }
+            channel.writeAndFlush(pingRespMessage);
         }
     }
 }

@@ -34,7 +34,7 @@ public class InternalCommunication {
         if (brokerProperties.isKafkaBrokerEnabled()) {
             kafkaService.send(internalMessage);
         }
-        // 如果开启集群功能
+        // 如果开启redis-cluster集群功能
         if (brokerProperties.isClusterEnabled()) {
             redisCluster.sendMessage(internalMessage);
         }

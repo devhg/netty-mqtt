@@ -17,6 +17,8 @@ public class App implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        Thread thread = new Thread();
+        thread.start();
         server.start();
     }
 

@@ -139,7 +139,7 @@ public class ProtocolProcess {
         return pubComp;
     }
 
-    // public ISessionStoreService getSessionStoreService() {
-    //     return sessionStoreService;
-    // }
+    public ISessionStoreService getSessionStoreService() {
+        return sessionStoreService;
+    }
 }

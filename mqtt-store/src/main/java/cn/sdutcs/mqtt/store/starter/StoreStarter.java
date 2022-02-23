@@ -88,6 +88,8 @@ public class StoreStarter {
     @Value("${redis.nodes}")
     private String redisEndpoints;
 
+    public static boolean isClusterMode = false;
+
     public Properties getProperties() {
         Properties properties = new Properties();
         properties.put("bootstrap.servers", PROP_KAFKA_SERVERS);
@@ -120,6 +122,7 @@ public class StoreStarter {
             if (redisMode.equals("normal")) {
                 this.jedis = new JedisPooled(redisHost, redisPort);
             } else if (redisMode.equals("cluster")) {
+                StoreStarter.isClusterMode = true;
                 Set<HostAndPort> jedisClusterNodes = new HashSet<HostAndPort>();
                 String[] nodes = redisEndpoints.split(",");
                 Arrays.stream(nodes).forEach((addr) -> {

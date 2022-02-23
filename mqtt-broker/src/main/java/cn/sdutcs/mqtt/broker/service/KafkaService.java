@@ -12,9 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * Created by wizzer on 2018
- */
 @Component
 public class KafkaService {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaService.class);
@@ -29,17 +26,16 @@ public class KafkaService {
             // 消息体转换为Hex字符串进行转发
             ProducerRecord<String, String> data = new ProducerRecord<>(brokerProperties.getKafkaProducerTopic(),
                     internalMessage.getTopic(), JSONObject.toJSONString(internalMessage));
-            kafkaProducer.send(data,
-                    new Callback() {
-                        public void onCompletion(RecordMetadata metadata, Exception e) {
-                            if (e != null) {
-                                e.printStackTrace();
-                                LOGGER.error(e.getMessage(), e);
-                            } else {
-                                LOGGER.info("The offset of the record we just sent is: " + metadata.offset());
-                            }
-                        }
-                    });
+            kafkaProducer.send(data, new Callback() {
+                public void onCompletion(RecordMetadata metadata, Exception e) {
+                    if (e != null) {
+                        e.printStackTrace();
+                        LOGGER.error(e.getMessage(), e);
+                    } else {
+                        LOGGER.info("The offset of the record we just sent is: " + metadata.offset());
+                    }
+                }
+            });
         } catch (Exception e) {
             LOGGER.error("kafka没有连接成功..");
         }

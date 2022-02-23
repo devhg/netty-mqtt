@@ -123,8 +123,9 @@ public class Connect {
             if (channel.pipeline().names().contains("idle")) {
                 channel.pipeline().remove("idle");
             }
+            // 若Broker超过1.5T时间没收到心跳请求则断开连接，并且投递遗嘱消息到订阅方 todo 如何投递遗嘱
             expire = Math.round(msg.variableHeader().keepAliveTimeSeconds() * 1.5f);
-            channel.pipeline().addFirst("idle", new IdleStateHandler(0, 0, expire));
+            channel.pipeline().addFirst("idle", new IdleStateHandler(expire, 0, 0));
         }
 
         // 处理遗嘱信息
