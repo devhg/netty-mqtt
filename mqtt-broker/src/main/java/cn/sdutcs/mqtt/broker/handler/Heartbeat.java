@@ -3,7 +3,7 @@ package cn.sdutcs.mqtt.broker.handler;
 
 import java.io.Serializable;
 
-public class Heartbeat extends BaseMessage implements Serializable {
+public class Heartbeat implements Serializable {
 
     private static final long serialVersionUID = -7175677772224683310L;
 

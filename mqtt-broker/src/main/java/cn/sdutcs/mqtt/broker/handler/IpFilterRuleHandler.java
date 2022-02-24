@@ -1,4 +1,4 @@
-package cn.sdutcs.mqtt.broker.server;
+package cn.sdutcs.mqtt.broker.handler;
 
 import cn.hutool.core.util.StrUtil;
 import cn.sdutcs.mqtt.broker.service.BlackListService;

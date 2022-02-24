@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.sdutcs.mqtt.broker.codec.MqttWebSocketCodec;
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.handler.BrokerHandler;
+import cn.sdutcs.mqtt.broker.handler.IpFilterRuleHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
@@ -20,9 +21,6 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
-import io.netty.handler.ipfilter.IpFilterRule;
-import io.netty.handler.ipfilter.IpFilterRuleType;
-import io.netty.handler.ipfilter.IpSubnetFilterRule;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
@@ -33,7 +31,6 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.Lifecycle;
@@ -43,13 +40,11 @@ import org.springframework.stereotype.Component;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLEngine;
 import java.io.InputStream;
-import java.net.InetSocketAddress;
 import java.security.KeyStore;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class BrokerServer implements Lifecycle {
-
     private static final Logger logger = LoggerFactory.getLogger(BrokerServer.class);
 
     private volatile boolean running = false;

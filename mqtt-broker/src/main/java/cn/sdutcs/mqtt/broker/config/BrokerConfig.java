@@ -1,6 +1,5 @@
 package cn.sdutcs.mqtt.broker.config;
 
-import cn.sdutcs.mqtt.store.starter.StoreStarter;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

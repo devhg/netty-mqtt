@@ -1,7 +1,6 @@
 package cn.sdutcs.mqtt.store.cache;
 
 import cn.sdutcs.mqtt.common.message.RetainMessageStore;
-import cn.sdutcs.mqtt.store.starter.StoreStarter;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

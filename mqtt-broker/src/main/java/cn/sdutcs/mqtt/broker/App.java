@@ -2,6 +2,7 @@ package cn.sdutcs.mqtt.broker;
 
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.server.BrokerServer;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -9,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication(scanBasePackages = "cn.sdutcs.mqtt")
+@MapperScan("cn.sdutcs.mqtt.broker.web")
 public class App implements CommandLineRunner {
     @Autowired
     BrokerConfig config;
@@ -17,8 +19,6 @@ public class App implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Thread thread = new Thread();
-        thread.start();
         server.start();
     }
 

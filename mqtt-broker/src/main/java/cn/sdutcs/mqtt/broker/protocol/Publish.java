@@ -1,12 +1,13 @@
 package cn.sdutcs.mqtt.broker.protocol;
 
-import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.internal.InternalCommunication;
 import cn.sdutcs.mqtt.broker.internal.InternalMessage;
 import cn.sdutcs.mqtt.broker.internal.MessageSender;
-import cn.sdutcs.mqtt.common.message.*;
+import cn.sdutcs.mqtt.broker.config.BrokerConfig;
+import cn.sdutcs.mqtt.common.message.IRetainMessageStoreService;
 import cn.sdutcs.mqtt.common.session.ISessionStoreService;
 import cn.sdutcs.mqtt.common.session.SessionStore;
+import cn.sdutcs.mqtt.common.message.RetainMessageStore;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelId;
 import io.netty.handler.codec.mqtt.*;
