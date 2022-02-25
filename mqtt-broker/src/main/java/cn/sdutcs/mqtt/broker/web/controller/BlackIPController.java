@@ -1,10 +1,8 @@
 package cn.sdutcs.mqtt.broker.web.controller;
 
-import cn.sdutcs.mqtt.broker.web.dao.BlackListMapper;
-import cn.sdutcs.mqtt.broker.web.dao.UserMapper;
+import cn.sdutcs.mqtt.broker.service.BlackListService;
 import cn.sdutcs.mqtt.broker.web.model.BlackIP;
 import cn.sdutcs.mqtt.broker.web.model.Result;
-import cn.sdutcs.mqtt.broker.web.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,19 +15,18 @@ import java.util.List;
 public class BlackIPController {
 
     @Autowired
-    private BlackListMapper blackListMapper;
+    private BlackListService blackListService;
 
     @GetMapping("/blacklist")
     public Result<Object> getBlackIPList() {
-        List<BlackIP> blackIPList = blackListMapper.getAll();
+        List<BlackIP> blackIPList = blackListService.fetchIPBlackList();
         return Result.success(blackIPList);
     }
 
     @PostMapping("/blackip")
     public Result<Object> createBlackIP(@RequestBody BlackIP blackIP) {
-        int insertOK = blackListMapper.insert(blackIP);
-        System.out.println("insertOK = " + insertOK);
-        if (insertOK == 1) {
+        boolean insertOK = blackListService.addIPToBlackList(blackIP);
+        if (insertOK) {
             return Result.SUCCESS;
         }
         return Result.failure("加入黑名单失败");
@@ -37,10 +34,7 @@ public class BlackIPController {
 
     @DeleteMapping(value = "/delete/{id}")
     public Result<Object> delete(@PathVariable("id") Long id) {
-        int delete = blackListMapper.delete(id);
-        if (delete == 1) {
-            return Result.SUCCESS;
-        }
-        return Result.FAIL;
+        boolean delete = blackListService.deleteIPFromBlackList(id);
+        return delete ? Result.SUCCESS : Result.FAIL;
     }
 }

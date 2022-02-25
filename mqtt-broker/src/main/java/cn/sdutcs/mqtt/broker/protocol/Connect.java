@@ -2,6 +2,7 @@ package cn.sdutcs.mqtt.broker.protocol;
 
 import cn.hutool.core.util.StrUtil;
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
+import cn.sdutcs.mqtt.broker.service.PacketService;
 import cn.sdutcs.mqtt.common.auth.IAuthService;
 import cn.sdutcs.mqtt.common.message.DupPubRelMessageStore;
 import cn.sdutcs.mqtt.common.message.DupPublishMessageStore;
@@ -33,6 +34,7 @@ public class Connect {
     private static final Logger LOGGER = LoggerFactory.getLogger(Connect.class);
 
     private final BrokerConfig brokerProperties;
+    private final PacketService packetService;
     private final IAuthService authService;
     private final ISessionStoreService sessionStoreService;
     private final ISubscribeStoreService subscribeStoreService;
@@ -43,7 +45,8 @@ public class Connect {
 
     private final ConcurrentHashMap<String, ChannelId> channelIdMap;
 
-    public Connect(BrokerConfig brokerProperties,
+    public Connect(PacketService packetService,
+                   BrokerConfig brokerProperties,
                    IAuthService authService,
                    ISessionStoreService sessionStoreService,
                    ISubscribeStoreService subscribeStoreService,
@@ -51,6 +54,7 @@ public class Connect {
                    IDupPubRelMessageStoreService dupPubRelMessageStoreService,
                    ConcurrentHashMap<String, ChannelId> channelIdMap) {
         this.brokerProperties = brokerProperties;
+        this.packetService = packetService;
         this.authService = authService;
         this.sessionStoreService = sessionStoreService;
         this.subscribeStoreService = subscribeStoreService;
@@ -61,6 +65,9 @@ public class Connect {
 
     public void processConnect(Channel channel, MqttConnectMessage msg) throws UnsupportedEncodingException {
         LOGGER.info("CONNECT - from clientId: {}, cleanSession: {}", msg.payload().clientIdentifier(), msg.variableHeader().isCleanSession());
+        packetService.Log("CONNECT", msg.payload().clientIdentifier(), null,
+                "[C -> S] : cleanSession:" + msg.variableHeader().isCleanSession(),
+                msg.fixedHeader().qosLevel().toString());
 
         // clientId为空或null的情况, 这里要求客户端必须提供clientId, 不管cleanSession是否为1, 此处没有参考标准协议实现
         if (StrUtil.isBlank(msg.payload().clientIdentifier())) {
@@ -68,6 +75,8 @@ public class Connect {
                     new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                     new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false),
                     null);
+            packetService.Log("CONNACK", "Blank clientIdentifier", null,
+                    "[C <- S] : MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED", msg.fixedHeader().qosLevel().toString());
             channel.writeAndFlush(connAckMessage);
             channel.close();
             return;
@@ -83,6 +92,9 @@ public class Connect {
                         new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                         new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD, false),
                         null);
+                packetService.Log("CONNACK", msg.payload().clientIdentifier(), null,
+                        "[C <- S] : MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD", msg.fixedHeader().qosLevel().toString());
+
                 channel.writeAndFlush(connAckMessage);
                 channel.close();
                 return;
@@ -148,9 +160,11 @@ public class Connect {
         MqttConnAckMessage okResp = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                 new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_ACCEPTED, sessionPresent), null);
+        LOGGER.info("CONNACK - to clientId: {}, cleanSession: {} established", clientId, msg.variableHeader().isCleanSession());
+        packetService.Log("CONNACK", msg.payload().clientIdentifier(), null,
+                "[C <- S] : MqttConnectReturnCode.CONNECTION_ACCEPTED established", msg.fixedHeader().qosLevel().toString());
 
         channel.writeAndFlush(okResp);
-        LOGGER.info("CONNACK - clientId: {}, cleanSession: {} established", clientId, msg.variableHeader().isCleanSession());
 
         // 如果cleanSession为0则表示复用之前的session, 需要重发此clientId存储的未完成的QoS1和QoS2的DUP消息
         if (!msg.variableHeader().isCleanSession()) {
@@ -162,6 +176,9 @@ public class Connect {
                         new MqttFixedHeader(MqttMessageType.PUBLISH, true, MqttQoS.valueOf(dupPublishMessageStore.getMqttQoS()), false, 0),
                         new MqttPublishVariableHeader(dupPublishMessageStore.getTopic(), dupPublishMessageStore.getMessageId()),
                         Unpooled.buffer().writeBytes(dupPublishMessageStore.getMessageBytes()));
+
+                packetService.Log("PUBLISH", msg.payload().clientIdentifier(), dupPublishMessageStore.getTopic(),
+                        "[C <- S] : from old session", publishMessage.fixedHeader().qosLevel().toString());
                 channel.writeAndFlush(publishMessage);
             });
 
@@ -170,6 +187,9 @@ public class Connect {
                         new MqttFixedHeader(MqttMessageType.PUBREL, true, MqttQoS.AT_MOST_ONCE, false, 0),
                         MqttMessageIdVariableHeader.from(dupPubRelMessageStore.getMessageId()),
                         null);
+
+                packetService.Log("PUBREL", msg.payload().clientIdentifier(), null,
+                        "[C <- S] : from old session", pubRelMessage.fixedHeader().qosLevel().toString());
                 channel.writeAndFlush(pubRelMessage);
             });
         }

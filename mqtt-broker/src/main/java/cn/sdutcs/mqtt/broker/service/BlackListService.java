@@ -13,18 +13,21 @@ public class BlackListService {
     BlackListMapper blackListMapper;
 
     public boolean checkBlackList(String hostAddress) {
-        int isReject = blackListMapper.exist(hostAddress);
-        return isReject != 1;
+        BlackIP blackIP = blackListMapper.getOne(hostAddress);
+        if (null == blackIP) {
+            return false;
+        }
+        return blackIP.getIp().equals(hostAddress);
     }
 
     public boolean addIPToBlackList(BlackIP ip) {
-        int ok = blackListMapper.insert(ip);
-        return ok == 1;
+        int affectedRows = blackListMapper.insert(ip);
+        return affectedRows == 1;
     }
 
     public boolean deleteIPFromBlackList(Long ipID) {
-        int ok = blackListMapper.delete(ipID);
-        return ok == 1;
+        int affectedRows = blackListMapper.delete(ipID);
+        return affectedRows == 1;
     }
 
     public List<BlackIP> fetchIPBlackList() {

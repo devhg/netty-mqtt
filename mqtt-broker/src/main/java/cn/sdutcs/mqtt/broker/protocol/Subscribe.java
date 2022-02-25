@@ -1,6 +1,7 @@
 package cn.sdutcs.mqtt.broker.protocol;
 
 import cn.hutool.core.util.StrUtil;
+import cn.sdutcs.mqtt.broker.service.PacketService;
 import cn.sdutcs.mqtt.common.message.IMessageIdService;
 import cn.sdutcs.mqtt.common.message.IRetainMessageStoreService;
 import cn.sdutcs.mqtt.common.message.RetainMessageStore;
@@ -26,10 +27,13 @@ public class Subscribe {
     private IMessageIdService messageIdService;
     private IRetainMessageStoreService retainMessageStoreService;
     private ISubscribeStoreService subscribeStoreService;
+    private PacketService packetService;
 
-    public Subscribe(IMessageIdService messageIdService,
+    public Subscribe(PacketService packetService,
+                     IMessageIdService messageIdService,
                      IRetainMessageStoreService retainMessageStoreService,
                      ISubscribeStoreService subscribeStoreService) {
+        this.packetService = packetService;
         this.messageIdService = messageIdService;
         this.retainMessageStoreService = retainMessageStoreService;
         this.subscribeStoreService = subscribeStoreService;
@@ -46,13 +50,19 @@ public class Subscribe {
                 SubscribeStore subscribeStore = new SubscribeStore(clientId, topicFilter, mqttQoS.value());
                 subscribeStoreService.put(topicFilter, subscribeStore);
                 mqttQoSList.add(mqttQoS.value());
-                LOGGER.info("SUBSCRIBE - clientId: {}, topFilter: {}, QoS: {}", clientId, topicFilter, mqttQoS.value());
+
+                LOGGER.info("SUBSCRIBE - from clientId: {}, topFilter: {}, QoS: {}", clientId, topicFilter, mqttQoS.value());
+                packetService.Log("SUBSCRIBE", clientId, topicFilter, "[C -> S] : client subscribe " + topicFilter, mqttQoS.toString());
             });
+
             MqttSubAckMessage subAckMessage = (MqttSubAckMessage) MqttMessageFactory.newMessage(
                     new MqttFixedHeader(MqttMessageType.SUBACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                     MqttMessageIdVariableHeader.from(msg.variableHeader().messageId()),
                     new MqttSubAckPayload(mqttQoSList));
+            LOGGER.info("SUBACK  - to clientId: {}, QoS: {}", clientId, MqttQoS.AT_MOST_ONCE.value());
+            packetService.Log("SUBACK", clientId, null, "[C <- S] : server suback ", MqttQoS.AT_MOST_ONCE.toString());
             channel.writeAndFlush(subAckMessage);
+
             // 发布保留消息
             topicSubscriptions.forEach(topicSubscription -> {
                 String topicFilter = topicSubscription.topicName();
@@ -60,6 +70,7 @@ public class Subscribe {
                 this.sendRetainMessage(channel, topicFilter, mqttQoS);
             });
         } else {
+            LOGGER.error("{} topics have not valid topic", topicSubscriptions);
             channel.close();
         }
     }
@@ -84,6 +95,8 @@ public class Subscribe {
 
     private void sendRetainMessage(Channel channel, String topicFilter, MqttQoS mqttQoS) {
         List<RetainMessageStore> retainMessageStores = retainMessageStoreService.search(topicFilter);
+        String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
+
         retainMessageStores.forEach(retainMessageStore -> {
             MqttQoS respQoS = retainMessageStore.getMqttQoS() > mqttQoS.value() ? mqttQoS : MqttQoS.valueOf(retainMessageStore.getMqttQoS());
             if (respQoS == MqttQoS.AT_MOST_ONCE) {
@@ -91,27 +104,32 @@ public class Subscribe {
                         new MqttFixedHeader(MqttMessageType.PUBLISH, false, respQoS, false, 0),
                         new MqttPublishVariableHeader(retainMessageStore.getTopic(), 0),
                         Unpooled.buffer().writeBytes(retainMessageStore.getMessageBytes()));
-                LOGGER.info("PUBLISH - clientId: {}, topic: {}, Qos: {}", (String) channel.attr(AttributeKey.valueOf("clientId")).get(), retainMessageStore.getTopic(), respQoS.value());
+
+                LOGGER.info("PUBLISH - to clientId: {}, topic: {}, Qos: {}", clientId, retainMessageStore.getTopic(), respQoS.value());
+                packetService.Log("PUBLISH", clientId, retainMessageStore.getTopic(), "[C <- S] : send remain message", respQoS.toString());
                 channel.writeAndFlush(publishMessage);
             }
-            if (respQoS == MqttQoS.AT_LEAST_ONCE) {
+            if (respQoS == MqttQoS.AT_LEAST_ONCE || respQoS == MqttQoS.EXACTLY_ONCE) {
                 int messageId = messageIdService.getNextMessageId();
                 MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
                         new MqttFixedHeader(MqttMessageType.PUBLISH, false, respQoS, false, 0),
                         new MqttPublishVariableHeader(retainMessageStore.getTopic(), messageId),
                         Unpooled.buffer().writeBytes(retainMessageStore.getMessageBytes()));
-                LOGGER.info("PUBLISH - clientId: {}, topic: {}, Qos: {}, messageId: {}", (String) channel.attr(AttributeKey.valueOf("clientId")).get(), retainMessageStore.getTopic(), respQoS.value(), messageId);
+
+                LOGGER.info("PUBLISH - to clientId: {}, topic: {}, Qos: {}, messageId: {}", clientId, retainMessageStore.getTopic(), respQoS.value(), messageId);
+                packetService.Log("PUBLISH", clientId, retainMessageStore.getTopic(), "[C <- S] : send remain messageId=" + messageId, respQoS.toString());
                 channel.writeAndFlush(publishMessage);
             }
-            if (respQoS == MqttQoS.EXACTLY_ONCE) {
-                int messageId = messageIdService.getNextMessageId();
-                MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
-                        new MqttFixedHeader(MqttMessageType.PUBLISH, false, respQoS, false, 0),
-                        new MqttPublishVariableHeader(retainMessageStore.getTopic(), messageId),
-                        Unpooled.buffer().writeBytes(retainMessageStore.getMessageBytes()));
-                LOGGER.info("PUBLISH - clientId: {}, topic: {}, Qos: {}, messageId: {}", (String) channel.attr(AttributeKey.valueOf("clientId")).get(), retainMessageStore.getTopic(), respQoS.value(), messageId);
-                channel.writeAndFlush(publishMessage);
-            }
+            // if (respQoS == MqttQoS.EXACTLY_ONCE) {
+            //     int messageId = messageIdService.getNextMessageId();
+            //     MqttPublishMessage publishMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
+            //             new MqttFixedHeader(MqttMessageType.PUBLISH, false, respQoS, false, 0),
+            //             new MqttPublishVariableHeader(retainMessageStore.getTopic(), messageId),
+            //             Unpooled.buffer().writeBytes(retainMessageStore.getMessageBytes()));
+            //     LOGGER.info("PUBLISH - to clientId: {}, topic: {}, Qos: {}, messageId: {}", clientId, retainMessageStore.getTopic(), respQoS.value(), messageId);
+            //     packetService.Log("PUBLISH", clientId, retainMessageStore.getTopic(), "[C <- S] : send remain messageId=" + messageId, respQoS.toString());
+            //     channel.writeAndFlush(publishMessage);
+            // }
         });
     }
 }

@@ -76,14 +76,14 @@ public class Publish {
             internalCommunication.internalSend(internalMessage);
             messageSender.sendPublishMessage(clientId, msg.variableHeader().topicName(),
                     msg.fixedHeader().qosLevel(), messageBytes, false, false);
-            messageSender.sendPubAckMessage(channel, msg.variableHeader().packetId());
+            messageSender.sendPubAckMessage(clientId, channel, msg.variableHeader().packetId());
         }
         // Qos=2
         if (msg.fixedHeader().qosLevel() == MqttQoS.EXACTLY_ONCE) {
             internalCommunication.internalSend(internalMessage);
             messageSender.sendPublishMessage(clientId, msg.variableHeader().topicName(),
                     msg.fixedHeader().qosLevel(), messageBytes, false, false);
-            messageSender.sendPubAckMessage(channel, msg.variableHeader().packetId());
+            messageSender.sendPubAckMessage(clientId, channel, msg.variableHeader().packetId());
             // this.sendPubRecMessage(channel, msg.variableHeader().packetId());
         }
 

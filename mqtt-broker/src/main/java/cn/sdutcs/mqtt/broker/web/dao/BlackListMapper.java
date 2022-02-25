@@ -13,5 +13,5 @@ public interface BlackListMapper {
 
     int delete(Long id);
 
-    int exist(String hostAddress);
+    BlackIP getOne(String hostAddress);
 }

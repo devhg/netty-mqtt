@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * PUBREL连接处理，消息释放(Qos2第二阶段)
+ * 一般是服务端发出
  */
 public class PubRel {
 

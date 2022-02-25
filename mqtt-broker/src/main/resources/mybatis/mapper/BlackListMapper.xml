@@ -26,4 +26,10 @@
         WHERE id = #{id}
     </delete>
 
+    <select id="getOne" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT id, ip, op_user, create_time
+        FROM ip_black_list
+        WHERE ip = #{ip}
+    </select>
+
 </mapper>

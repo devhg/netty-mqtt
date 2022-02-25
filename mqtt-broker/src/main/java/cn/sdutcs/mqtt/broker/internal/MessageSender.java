@@ -1,5 +1,6 @@
 package cn.sdutcs.mqtt.broker.internal;
 
+import cn.sdutcs.mqtt.broker.service.PacketService;
 import cn.sdutcs.mqtt.common.message.DupPublishMessageStore;
 import cn.sdutcs.mqtt.common.message.IDupPublishMessageStoreService;
 import cn.sdutcs.mqtt.common.message.IMessageIdService;
@@ -37,6 +38,8 @@ public class MessageSender {
     private ConcurrentHashMap<String, ChannelId> channelIdMap;
     @Autowired
     private ChannelGroup channelGroup;
+    @Autowired
+    private PacketService packetService;
 
     public void sendPublishMessage(String fromClientId, String topic, MqttQoS mqttQoS,
                                    byte[] messageBytes, boolean retain, boolean dup) {
@@ -53,7 +56,10 @@ public class MessageSender {
                             new MqttFixedHeader(MqttMessageType.PUBLISH, dup, respQoS, retain, 0),
                             new MqttPublishVariableHeader(topic, 0),
                             Unpooled.buffer().writeBytes(messageBytes));
-                    LOGGER.info("PUBLISH - fromClientId: {} toClientId: {}, topic: {}, Qos: {}", fromClientId, clientId, topic, respQoS.value());
+
+                    LOGGER.info("PUBLISH - from clientId: {} to clientId: {}, topic: {}, Qos: {}", fromClientId, clientId, topic, respQoS.value());
+                    packetService.Log("PUBLISH", fromClientId, topic,
+                            String.format("[C <- S] fromClientId: %s toClientId: %s", fromClientId, clientId), respQoS.toString());
                     this.sendToChannel(clientId, publishMessage);
                 }
                 // Qos=1
@@ -63,11 +69,16 @@ public class MessageSender {
                             new MqttFixedHeader(MqttMessageType.PUBLISH, dup, respQoS, retain, 0),
                             new MqttPublishVariableHeader(topic, messageId),
                             Unpooled.buffer().writeBytes(messageBytes));
-                    LOGGER.info("PUBLISH - fromClientId: {} toClientId: {}, topic: {}, Qos: {}, messageId: {}",
+
+                    LOGGER.info("PUBLISH - from clientId: {} to clientId: {}, topic: {}, Qos: {}, messageId: {}",
                             fromClientId, clientId, topic, respQoS.value(), messageId);
+                    packetService.Log("PUBLISH", fromClientId, topic,
+                            String.format("[C <- S] fromClientId: %s toClientId: %s", fromClientId, clientId), respQoS.toString());
+
                     DupPublishMessageStore dupPublishMessageStore = new DupPublishMessageStore().setClientId(clientId)
                             .setTopic(topic).setMqttQoS(respQoS.value()).setMessageBytes(messageBytes).setMessageId(messageId);
                     dupPublishMessageStoreService.put(clientId, dupPublishMessageStore);
+
                     this.sendToChannel(clientId, publishMessage);
                 }
                 // Qos=2
@@ -77,11 +88,16 @@ public class MessageSender {
                             new MqttFixedHeader(MqttMessageType.PUBLISH, dup, respQoS, retain, 0),
                             new MqttPublishVariableHeader(topic, messageId),
                             Unpooled.buffer().writeBytes(messageBytes));
-                    LOGGER.info("PUBLISH - fromClientId: {} toClientId: {}, topic: {}, Qos: {}, messageId: {}",
+
+                    LOGGER.info("PUBLISH - from clientId: {} to clientId: {}, topic: {}, Qos: {}, messageId: {}",
                             fromClientId, clientId, topic, respQoS.value(), messageId);
+                    packetService.Log("PUBLISH", fromClientId, topic,
+                            String.format("[C <- S] fromClientId: %s toClientId: %s", fromClientId, clientId), respQoS.toString());
+
                     DupPublishMessageStore dupPublishMessageStore = new DupPublishMessageStore().setClientId(clientId)
                             .setTopic(topic).setMqttQoS(respQoS.value()).setMessageBytes(messageBytes).setMessageId(messageId);
                     dupPublishMessageStoreService.put(clientId, dupPublishMessageStore);
+
                     this.sendToChannel(clientId, publishMessage);
                 }
             }
@@ -122,17 +138,23 @@ public class MessageSender {
         );
     }
 
-    public void sendPubAckMessage(Channel channel, int messageId) {
+    public void sendPubAckMessage(String clientId, Channel channel, int messageId) {
         MqttPubAckMessage pubAckMessage = (MqttPubAckMessage) MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.PUBACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                 MqttMessageIdVariableHeader.from(messageId), null);
+
+        LOGGER.info("PUBACK - to clientId: {}, messageId: {}", clientId, messageId);
+        packetService.Log("PUBACK", clientId, null, "[C <- S] : to fromClient ack messageId=" + messageId, MqttQoS.AT_MOST_ONCE.toString());
         channel.writeAndFlush(pubAckMessage);
     }
 
-    public void sendPubRecMessage(Channel channel, int messageId) {
+    public void sendPubRecMessage(String clientId, Channel channel, int messageId) {
         MqttMessage pubRecMessage = MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.PUBREC, false, MqttQoS.AT_MOST_ONCE, false, 0),
                 MqttMessageIdVariableHeader.from(messageId), null);
+
+        LOGGER.info("PUBREC - to clientId: {}, messageId: {}", clientId, messageId);
+        packetService.Log("PUBREC", clientId, null, "[C <- S] : to fromClient rec messageId=" + messageId, MqttQoS.AT_MOST_ONCE.toString());
         channel.writeAndFlush(pubRecMessage);
     }
 }
