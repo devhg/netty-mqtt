@@ -10,15 +10,31 @@
     </resultMap>
 
     <select id="getAll" resultMap="BaseResultMap">
-        SELECT id, ip, op_user, create_time
+        SELECT id, ip, op_user, status, create_time
         FROM ip_black_list
+        <where>
+            <if test="ip != null">
+                and ip=#{ip}
+            </if>
+            <if test="opUser != null">
+                and op_user=#{opUser}
+            </if>
+        </where>
     </select>
 
     <insert id="insert" parameterType="cn.sdutcs.mqtt.broker.web.model.User">
         INSERT INTO ip_black_list
-            (ip, op_user, create_time)
-        VALUES (#{ip}, #{opUser}, NOW())
+            (ip, op_user, status, create_time)
+        VALUES (#{ip}, #{opUser}, #{status}, NOW())
     </insert>
+
+    <update id="update" parameterType="cn.sdutcs.mqtt.broker.web.model.User">
+        UPDATE ip_black_list
+        SET ip=#{ip},
+            status=#{status},
+            op_user=#{opUser}
+        WHERE id = #{id}
+    </update>
 
     <delete id="delete" parameterType="java.lang.Long">
         DELETE

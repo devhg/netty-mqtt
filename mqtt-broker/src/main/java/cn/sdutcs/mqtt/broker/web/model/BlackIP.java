@@ -12,7 +12,8 @@ public class BlackIP implements Serializable {
 
     private Long id;
     private String ip;
+    private int status;
     @JsonProperty("op_user")
-    private Long opUser;
+    private String opUser;
     private Date createTime;
 }

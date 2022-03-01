@@ -25,12 +25,17 @@ public class BlackListService {
         return affectedRows == 1;
     }
 
+    public boolean updateIPToBlackList(BlackIP ip) {
+        int affectedRows = blackListMapper.update(ip);
+        return affectedRows == 1;
+    }
+
     public boolean deleteIPFromBlackList(Long ipID) {
         int affectedRows = blackListMapper.delete(ipID);
         return affectedRows == 1;
     }
 
-    public List<BlackIP> fetchIPBlackList() {
-        return blackListMapper.getAll();
+    public List<BlackIP> fetchIPBlackList(String ip, String opUser) {
+        return blackListMapper.getAll(ip, opUser);
     }
 }

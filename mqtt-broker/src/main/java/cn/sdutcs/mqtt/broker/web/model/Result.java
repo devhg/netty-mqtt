@@ -6,7 +6,7 @@ import lombok.Data;
 public class Result<T> {
     private int code;
     private String message;
-    private T data;
+    private T result;
 
     public Result(int code, String msg) {
         this.code = code;
@@ -16,10 +16,10 @@ public class Result<T> {
     public Result(int code, String msg, T data) {
         this.code = code;
         this.message = msg;
-        this.data = data;
+        this.result = data;
     }
 
-    public static final Result<Object> SUCCESS = new Result<>(200, "success");
+    public static final Result<Object> SUCCESS = new Result<>(0, "success");
     public static final Result<Object> FAIL = new Result<>(-200, "failed");
 
     public static Result<Object> success() {
@@ -27,8 +27,8 @@ public class Result<T> {
     }
 
     public static Result<Object> success(Object data) {
-        Result<Object> result = new Result<>(200, "success");
-        result.setData(data);
+        Result<Object> result = new Result<>(0, "success");
+        result.setResult(data);
         return result;
     }
 
@@ -38,7 +38,7 @@ public class Result<T> {
 
     public static Result<Object> failure(Object data) {
         Result<Object> result = new Result<>(-200, "failed");
-        result.setData(data);
+        result.setResult(data);
         return result;
     }
 }

@@ -31,7 +31,12 @@ public class PacketService {
         return ok == 1;
     }
 
-    public List<Packet> fetchPackets(String fromTime, String toTime) {
-        return packetMapper.fetchAllPackets(fromTime, toTime);
+    public List<Packet> fetchPackets(String fromTime, String toTime,
+                                     int page, int pageSize, String clientId) {
+        return packetMapper.fetchAllPackets(fromTime, toTime, pageSize, (page - 1) * pageSize, clientId);
+    }
+
+    public int getPacketsTotal(String clientId, String fromTime, String toTime) {
+        return packetMapper.getPacketsTotal(clientId, fromTime, toTime);
     }
 }

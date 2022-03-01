@@ -1,5 +1,8 @@
 package cn.sdutcs.mqtt.common.session;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 会话存储服务接口
  */
@@ -29,4 +32,9 @@ public interface ISessionStoreService {
      * 删除会话
      */
     void remove(String clientId);
+
+    /**
+     * 会话列表
+     */
+    List<Map> getSessionList();
 }

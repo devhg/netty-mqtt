@@ -1,5 +1,8 @@
 package cn.sdutcs.mqtt.common.session;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.*;
@@ -22,14 +25,23 @@ public class SessionStore implements Serializable {
 
     private String channelId;
 
+    private String status = "active";
+
     private int expire;
 
     private boolean cleanSession;
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private MqttPublishMessage willMessage;
 
     public SessionStore() {
 
+    }
+
+    public SessionStore(String brokerId, String clientId, String status) {
+        this.brokerId = brokerId;
+        this.clientId = clientId;
+        this.status = status;
     }
 
     public SessionStore(String brokerId, String clientId, String channelId, boolean cleanSession, MqttPublishMessage willMessage, int expire) {
@@ -95,6 +107,9 @@ public class SessionStore implements Serializable {
         return this;
     }
 
+    /**
+     * SessionStore转为map
+     */
     public Map<String, Object> toMap() {
         Map<String, Object> sessionMap = new HashMap<>();
         sessionMap.put("clientId", clientId);
@@ -102,6 +117,7 @@ public class SessionStore implements Serializable {
         sessionMap.put("cleanSession", cleanSession);
         sessionMap.put("brokerId", brokerId);
         sessionMap.put("expire", expire);
+        sessionMap.put("status", status);
         if (willMessage != null) {
             sessionMap.put("payload", Base64.getEncoder().encodeToString(willMessage.payload().array()));
             sessionMap.put("messageType", willMessage.fixedHeader().messageType().value());
@@ -150,9 +166,31 @@ public class SessionStore implements Serializable {
         Boolean cleanSession = (Boolean) sessionMap.get("cleanSession");
         String brokerId = (String) sessionMap.get("brokerId");
         Integer expire = (Integer) sessionMap.get("expire");
+        String status = (String) sessionMap.get("status");
 
-        sessionStore.setChannelId(clientId).setChannelId(channelId).setCleanSession(cleanSession).
-                setBrokerId(brokerId).setExpire(expire);
+        sessionStore.setClientId(clientId).setChannelId(channelId).setCleanSession(cleanSession).
+                setBrokerId(brokerId).setExpire(expire).setStatus(status);
         return sessionStore;
+    }
+
+    @Override
+    public String toString() {
+        return "SessionStore{" +
+                "brokerId='" + brokerId + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", channelId='" + channelId + '\'' +
+                ", expire=" + expire +
+                ", cleanSession=" + cleanSession +
+                ", willMessage=" + willMessage +
+                '}';
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public SessionStore setStatus(String status) {
+        this.status = status;
+        return this;
     }
 }
