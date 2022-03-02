@@ -8,7 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PacketService {
@@ -38,5 +42,18 @@ public class PacketService {
 
     public int getPacketsTotal(String clientId, String fromTime, String toTime) {
         return packetMapper.getPacketsTotal(clientId, fromTime, toTime);
+    }
+
+    public Map<String, Object> getPacketsTotal(String time) {
+        long t = Long.parseLong(time);
+        Timestamp toTime = new Timestamp(t);
+        Timestamp fromTime = new Timestamp(t - 2000);
+
+        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        String fromStr = sdf.format(fromTime);
+        String toStr = sdf.format(toTime);
+
+        return packetMapper.getPacketsSumPerSecond(fromStr, toStr);
     }
 }

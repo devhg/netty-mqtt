@@ -8,10 +8,15 @@ import cn.sdutcs.mqtt.broker.web.dao.PacketMapper;
 import cn.sdutcs.mqtt.broker.web.model.BlackIP;
 import cn.sdutcs.mqtt.broker.web.model.Result;
 import cn.sdutcs.mqtt.common.record.Packet;
+import cn.sdutcs.mqtt.store.cache.QpsCounter;
+import jdk.nashorn.internal.runtime.regexp.joni.ast.StringNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -23,6 +28,8 @@ public class PacketController {
 
     @Autowired
     private PacketService packetService;
+    @Autowired
+    private QpsCounter qpsCounter;
 
     @GetMapping("/list")
     public Result<Object> getList(@RequestParam(name = "page", defaultValue = "1") int page,
@@ -30,8 +37,6 @@ public class PacketController {
                                   @RequestParam(name = "from", required = false) String from,
                                   @RequestParam(name = "to", required = false) String to,
                                   @RequestParam(name = "clientId", required = false) String clientId) {
-        System.out.println("clientId = " + clientId);
-
         if (StrUtil.isBlank(from) || StrUtil.isBlank(to)) {
             Date date = new Date();
             Calendar calendar = Calendar.getInstance();
@@ -42,12 +47,32 @@ public class PacketController {
         }
 
         int packetsTotal = packetService.getPacketsTotal(clientId, from, to);
-        System.out.println(packetsTotal);
         List<Packet> packets = packetService.fetchPackets(from, to, page, pageSize, clientId);
         Map<String, Object> res = new HashMap<>();
         res.put("data", packets);
         res.put("total", packetsTotal);
 
         return Result.success(res);
+    }
+
+    @GetMapping("/qps")
+    public Result<Object> getQps(@RequestParam(name = "t") String time) {
+        long t = Long.parseLong(time);
+        Timestamp toTime = new Timestamp(t);
+        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String tStr = sdf.format(toTime);
+
+        Integer qps = qpsCounter.GetCount("qps", tStr);
+        Map<String, Object> data = new HashMap<>();
+        data.put("x", time);
+        data.put("y", qps);
+
+        return Result.success(data);
+    }
+
+    @GetMapping("/packets_per_second")
+    public Result<Object> getPacketsPerSecond(@RequestParam(name = "t") String time) {
+        Map<String, Object> data = packetService.getPacketsTotal(time);
+        return Result.success(data);
     }
 }

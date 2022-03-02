@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public interface PacketMapper {
@@ -20,4 +21,7 @@ public interface PacketMapper {
     int getPacketsTotal(@Param("clientId") String clientId,
                         @Param("fromTime") String fromTime,
                         @Param("toTime") String toTime);
+
+    Map<String, Object> getPacketsSumPerSecond(@Param("fromTime") String fromTime,
+                                               @Param("toTime") String toTime);
 }

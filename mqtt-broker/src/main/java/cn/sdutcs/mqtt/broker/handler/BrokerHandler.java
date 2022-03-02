@@ -3,6 +3,7 @@ package cn.sdutcs.mqtt.broker.handler;
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.protocol.ProtocolProcess;
 import cn.sdutcs.mqtt.common.session.SessionStore;
+import cn.sdutcs.mqtt.store.cache.QpsCounter;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.DecoderException;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -40,6 +42,9 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
     @Autowired
     private ConcurrentHashMap<String, ChannelId> channelIdMap;
 
+    @Autowired
+    QpsCounter qpsCounter;
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
@@ -56,6 +61,9 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) throws Exception {
+        // qps计数
+        qpsCounter.Count("qps");
+
         if (msg.decoderResult().isFailure()) {
             Throwable cause = msg.decoderResult().cause();
             if (cause instanceof MqttUnacceptableProtocolVersionException) {
@@ -148,8 +156,6 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
-
-            System.out.println("成功处理了超时的问题");
             IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
             // 读超时
             if (idleStateEvent.state() == IdleState.READER_IDLE) {

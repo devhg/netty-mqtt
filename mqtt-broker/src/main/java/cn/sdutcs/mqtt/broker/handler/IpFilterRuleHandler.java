@@ -31,7 +31,6 @@ public class IpFilterRuleHandler extends RuleBasedIpFilter {
                 LOGGER.info("ip = {} is rejected.", hostAddress);
             }
         }
-        System.out.println("触发IP黑名单检查");
         return filterRuleType == IpFilterRuleType.ACCEPT;
     }
 }

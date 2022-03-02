@@ -23,7 +23,6 @@ public class SessionController {
                                          @RequestParam(name = "opUser", required = false) String opUser) {
         // List<BlackIP> blackIPList = blackListService.fetchIPBlackList(ip, opUser);
         List<Map> sessionList = sessionStoreService.getSessionList();
-        System.out.println("sessionList = " + sessionList);
         return Result.success(sessionList);
     }
 
