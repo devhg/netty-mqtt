@@ -139,7 +139,7 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
                 // 未通过SSL认证
                 MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                         new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                        new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE, false),
+                        new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD, false),
                         null);
                 ctx.writeAndFlush(connAckMessage);
                 LOGGER.error("SSL verify ERROR");

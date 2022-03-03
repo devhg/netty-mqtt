@@ -17,7 +17,7 @@ public class BlackListService {
         if (null == blackIP) {
             return false;
         }
-        return blackIP.getIp().equals(hostAddress);
+        return blackIP.getStatus() == 1;
     }
 
     public boolean addIPToBlackList(BlackIP ip) {

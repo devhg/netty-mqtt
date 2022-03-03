@@ -144,7 +144,9 @@ public class MessageSender {
                 MqttMessageIdVariableHeader.from(messageId), null);
 
         LOGGER.info("PUBACK - to clientId: {}, messageId: {}", clientId, messageId);
-        packetService.Log("PUBACK", clientId, null, "[C <- S] : to fromClient ack messageId=" + messageId, MqttQoS.AT_MOST_ONCE.toString());
+        packetService.Log("PUBACK", clientId, null,
+                "[C <- S] : to fromClient=" + clientId + " ack messageId=" + messageId,
+                MqttQoS.AT_MOST_ONCE.toString());
         channel.writeAndFlush(pubAckMessage);
     }
 
