@@ -17,7 +17,7 @@ import java.util.*;
 @Data
 public class StoreStarter {
     protected KafkaProducer kafkaProducer;
-    protected UnifiedJedis jedis;
+    // protected UnifiedJedis jedis;
 
     // @PropDoc(group = "broker", value = "实例名称", need = true, defaultValue = "mqtt")
     @Value("${mqtt.broker.id}")
@@ -69,24 +69,24 @@ public class StoreStarter {
 
     @Value("${mqtt.broker.redis-enabled}")
     private Boolean redisEnabled;
-    @Value("${redis.host}")
-    private String redisHost;
-    @Value("${redis.port}")
-    private Integer redisPort;
-    @Value("${redis.timeout}")
-    private Integer redisTimeout;
-    @Value("${redis.database}")
-    private String redisDatabase;
-    @Value("${redis.maxTotal}")
-    private Integer redisMaxTotal;
-    @Value("${redis.pool.maxIdle}")
-    private Integer redisPoolMaxIdle;
-    @Value("${redis.pool.minIdle}")
-    private Integer redisPoolMInIdle;
-    @Value("${redis.mode}")
-    private String redisMode;
-    @Value("${redis.nodes}")
-    private String redisEndpoints;
+    // @Value("${redis.host}")
+    // private String redisHost;
+    // @Value("${redis.port}")
+    // private Integer redisPort;
+    // @Value("${redis.timeout}")
+    // private Integer redisTimeout;
+    // @Value("${redis.database}")
+    // private String redisDatabase;
+    // @Value("${redis.maxTotal}")
+    // private Integer redisMaxTotal;
+    // @Value("${redis.pool.maxIdle}")
+    // private Integer redisPoolMaxIdle;
+    // @Value("${redis.pool.minIdle}")
+    // private Integer redisPoolMInIdle;
+    // @Value("${redis.mode}")
+    // private String redisMode;
+    // @Value("${redis.nodes}")
+    // private String redisEndpoints;
 
     public static boolean isClusterMode = false;
 
@@ -108,10 +108,10 @@ public class StoreStarter {
         return this.kafkaProducer;
     }
 
-    @Bean
-    public UnifiedJedis jedisPooled() {
-        return this.jedis;
-    }
+    // @Bean
+    // public UnifiedJedis jedisPooled() {
+    //     return this.jedis;
+    // }
 
     @PostConstruct
     public void init() throws Exception {
@@ -119,17 +119,17 @@ public class StoreStarter {
             this.kafkaProducer = new KafkaProducer(getProperties());
         }
         if (redisEnabled) {
-            if (redisMode.equals("normal")) {
-                this.jedis = new JedisPooled(redisHost, redisPort);
-            } else if (redisMode.equals("cluster")) {
-                StoreStarter.isClusterMode = true;
-                Set<HostAndPort> jedisClusterNodes = new HashSet<HostAndPort>();
-                String[] nodes = redisEndpoints.split(",");
-                Arrays.stream(nodes).forEach((addr) -> {
-                    jedisClusterNodes.add(HostAndPort.from(addr));
-                });
-                this.jedis = new JedisCluster(jedisClusterNodes);
-            }
+            // if (redisMode.equals("normal")) {
+            //     this.jedis = new JedisPooled(redisHost, redisPort);
+            // } else if (redisMode.equals("cluster")) {
+            //     StoreStarter.isClusterMode = true;
+            //     Set<HostAndPort> jedisClusterNodes = new HashSet<HostAndPort>();
+            //     String[] nodes = redisEndpoints.split(",");
+            //     Arrays.stream(nodes).forEach((addr) -> {
+            //         jedisClusterNodes.add(HostAndPort.from(addr));
+            //     });
+            //     this.jedis = new JedisCluster(jedisClusterNodes);
+            // }
         }
     }
 
@@ -138,8 +138,8 @@ public class StoreStarter {
         if (this.kafkaProducer != null) {
             this.kafkaProducer.close();
         }
-        if (this.jedis != null) {
-            jedis.close();
-        }
+        // if (this.jedis != null) {
+        //     jedis.close();
+        // }
     }
 }

@@ -26,15 +26,12 @@ public class DisConnect {
     private final IDupPublishMessageStoreService dupPublishMessageStoreService;
     private final IDupPubRelMessageStoreService dupPubRelMessageStoreService;
     private final MessageSender messageSender;
-    private final PacketService packetService;
 
-    public DisConnect(PacketService packetService,
-                      ISessionStoreService sessionStoreService,
+    public DisConnect(ISessionStoreService sessionStoreService,
                       ISubscribeStoreService subscribeStoreService,
                       IDupPublishMessageStoreService dupPublishMessageStoreService,
                       IDupPubRelMessageStoreService dupPubRelMessageStoreService,
                       MessageSender messageSender) {
-        this.packetService = packetService;
         this.sessionStoreService = sessionStoreService;
         this.subscribeStoreService = subscribeStoreService;
         this.dupPublishMessageStoreService = dupPublishMessageStoreService;
@@ -44,6 +41,8 @@ public class DisConnect {
 
     public void processDisConnect(Channel channel, MqttMessage msg) {
         String clientId = (String) channel.attr(AttributeKey.valueOf("clientId")).get();
+        LOGGER.info("DISCONNECT [C -> S] - from clientId: {}", clientId);
+
         SessionStore sessionStore = sessionStoreService.get(clientId);
         if (sessionStore != null && sessionStore.isCleanSession()) {
             subscribeStoreService.removeForClient(clientId);
@@ -54,8 +53,6 @@ public class DisConnect {
             // 处理遗嘱消息(存在session里面)
             messageSender.sendWillMessage(sessionStore.getClientId(), sessionStore.getWillMessage());
             sessionStoreService.remove(clientId);
-            LOGGER.debug("DISCONNECT - from clientId: {}, cleanSession: {}", clientId, sessionStore.isCleanSession());
-            packetService.Log("DISCONNECT", clientId, null, "[C -> S] disconnect ok", MqttQoS.AT_MOST_ONCE.toString());
         }
         channel.close();
     }

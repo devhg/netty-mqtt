@@ -58,31 +58,31 @@ public class Publish {
             }
         }
 
+        MqttQoS qosLevel = msg.fixedHeader().qosLevel();
+        String topicName = msg.variableHeader().topicName();
+
         byte[] messageBytes = new byte[msg.payload().readableBytes()];
         msg.payload().getBytes(msg.payload().readerIndex(), messageBytes);
-        InternalMessage internalMessage = new InternalMessage().setTopic(msg.variableHeader().topicName()).
-                setMqttQoS(msg.fixedHeader().qosLevel().value()).setMessageBytes(messageBytes).
-                setDup(false).setRetain(false).setClientId(clientId);
+
+        InternalMessage internalMessage = new InternalMessage().setTopic(topicName).setMqttQoS(qosLevel.value()).
+                setMessageBytes(messageBytes).setDup(false).setRetain(false).setClientId(clientId);
 
         // Qos=0
-        if (msg.fixedHeader().qosLevel() == MqttQoS.AT_MOST_ONCE) {
-            internalCommunication.internalSend(internalMessage);
-            messageSender.sendPublishMessage(clientId, msg.variableHeader().topicName(),
-                    msg.fixedHeader().qosLevel(), messageBytes, false, false);
+        if (qosLevel == MqttQoS.AT_MOST_ONCE) {
+            // internalCommunication.internalSend(internalMessage);
+            messageSender.sendPublishMessage(clientId, topicName, qosLevel, messageBytes, false, false);
 
         }
         // Qos=1
-        if (msg.fixedHeader().qosLevel() == MqttQoS.AT_LEAST_ONCE) {
-            internalCommunication.internalSend(internalMessage);
-            messageSender.sendPublishMessage(clientId, msg.variableHeader().topicName(),
-                    msg.fixedHeader().qosLevel(), messageBytes, false, false);
+        if (qosLevel == MqttQoS.AT_LEAST_ONCE) {
+            // internalCommunication.internalSend(internalMessage);
+            messageSender.sendPublishMessage(clientId, topicName, qosLevel, messageBytes, false, false);
             messageSender.sendPubAckMessage(clientId, channel, msg.variableHeader().packetId());
         }
         // Qos=2
-        if (msg.fixedHeader().qosLevel() == MqttQoS.EXACTLY_ONCE) {
-            internalCommunication.internalSend(internalMessage);
-            messageSender.sendPublishMessage(clientId, msg.variableHeader().topicName(),
-                    msg.fixedHeader().qosLevel(), messageBytes, false, false);
+        if (qosLevel == MqttQoS.EXACTLY_ONCE) {
+            // internalCommunication.internalSend(internalMessage);
+            messageSender.sendPublishMessage(clientId, topicName, qosLevel, messageBytes, false, false);
             messageSender.sendPubAckMessage(clientId, channel, msg.variableHeader().packetId());
             // this.sendPubRecMessage(channel, msg.variableHeader().packetId());
         }
@@ -90,11 +90,12 @@ public class Publish {
         // retain=1, 保留消息
         if (msg.fixedHeader().isRetain()) {
             if (messageBytes.length == 0) {
+                // isRetain == true && length = 0 说明删除上一个remain消息
                 retainMessageStoreService.remove(msg.variableHeader().topicName());
             } else {
-                RetainMessageStore retainMessageStore = new RetainMessageStore().setTopic(msg.variableHeader().topicName())
-                        .setMqttQoS(msg.fixedHeader().qosLevel().value()).setMessageBytes(messageBytes);
-                retainMessageStoreService.put(msg.variableHeader().topicName(), retainMessageStore);
+                RetainMessageStore retainMessageStore = new RetainMessageStore().setTopic(topicName)
+                        .setMqttQoS(qosLevel.value()).setMessageBytes(messageBytes);
+                retainMessageStoreService.put(topicName, retainMessageStore);
             }
         }
     }

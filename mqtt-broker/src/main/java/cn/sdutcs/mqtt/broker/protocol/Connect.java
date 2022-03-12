@@ -2,7 +2,9 @@ package cn.sdutcs.mqtt.broker.protocol;
 
 import cn.hutool.core.util.StrUtil;
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
-import cn.sdutcs.mqtt.broker.service.PacketService;
+import cn.sdutcs.mqtt.broker.domain.MqttMessageHelper;
+import cn.sdutcs.mqtt.broker.internal.RemotingHelper;
+import cn.sdutcs.mqtt.broker.service.BlackListService;
 import cn.sdutcs.mqtt.common.auth.IAuthService;
 import cn.sdutcs.mqtt.common.message.DupPubRelMessageStore;
 import cn.sdutcs.mqtt.common.message.DupPublishMessageStore;
@@ -28,13 +30,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * CONNECT连接处理
+ * 返回CONNACK
  */
 public class Connect {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Connect.class);
 
     private final BrokerConfig brokerProperties;
-    private final PacketService packetService;
+    private final BlackListService blackListService;
     private final IAuthService authService;
     private final ISessionStoreService sessionStoreService;
     private final ISubscribeStoreService subscribeStoreService;
@@ -45,8 +48,8 @@ public class Connect {
 
     private final ConcurrentHashMap<String, ChannelId> channelIdMap;
 
-    public Connect(PacketService packetService,
-                   BrokerConfig brokerProperties,
+    public Connect(BrokerConfig brokerProperties,
+                   BlackListService blackListService,
                    IAuthService authService,
                    ISessionStoreService sessionStoreService,
                    ISubscribeStoreService subscribeStoreService,
@@ -54,7 +57,7 @@ public class Connect {
                    IDupPubRelMessageStoreService dupPubRelMessageStoreService,
                    ConcurrentHashMap<String, ChannelId> channelIdMap) {
         this.brokerProperties = brokerProperties;
-        this.packetService = packetService;
+        this.blackListService = blackListService;
         this.authService = authService;
         this.sessionStoreService = sessionStoreService;
         this.subscribeStoreService = subscribeStoreService;
@@ -64,45 +67,38 @@ public class Connect {
     }
 
     public void processConnect(Channel channel, MqttConnectMessage msg) throws UnsupportedEncodingException {
-        LOGGER.info("CONNECT - from clientId: {}, cleanSession: {}", msg.payload().clientIdentifier(), msg.variableHeader().isCleanSession());
-        packetService.Log("CONNECT", msg.payload().clientIdentifier(), null,
-                "[C -> S] : cleanSession:" + msg.variableHeader().isCleanSession(),
-                msg.fixedHeader().qosLevel().toString());
+        String clientId = msg.payload().clientIdentifier();
+        String username = msg.payload().userName();
+        String password = msg.payload().passwordInBytes() == null ? null : new String(msg.payload().passwordInBytes(), StandardCharsets.UTF_8);
+        boolean cleanSession = msg.variableHeader().isCleanSession();
+        MqttQoS qoS = msg.fixedHeader().qosLevel();
 
-        // clientId为空或null的情况, 这里要求客户端必须提供clientId, 不管cleanSession是否为1, 此处没有参考标准协议实现
-        if (StrUtil.isBlank(msg.payload().clientIdentifier())) {
-            MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                    new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                    new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false),
-                    null);
-            packetService.Log("CONNACK", "Blank clientIdentifier", null,
-                    "[C <- S] : MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED", msg.fixedHeader().qosLevel().toString());
-            channel.writeAndFlush(connAckMessage);
-            channel.close();
-            return;
+        LOGGER.info("CONNECT [C -> S] - from clientId: {}, cleanSession: {}, Qos: {}", clientId, cleanSession, qoS);
+
+        boolean sessionPresent = false;
+        MqttConnectReturnCode returnCode = null;
+
+        if (StrUtil.isBlank(clientId)) {
+            // clientId为空或null的情况, 这里要求客户端必须提供clientId, 不管cleanSession是否为1, 此处没有参考标准协议实现
+            returnCode = MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED;
+            LOGGER.warn("CONNECT [rejected] - Blank clientIdentifier");
+        } else if (blackListService.onBlackList(RemotingHelper.getRemoteAddr(channel))) {
+            returnCode = MqttConnectReturnCode.CONNECTION_REFUSED_NOT_AUTHORIZED;
+            LOGGER.warn("CONNECT [rejected] - IP onBlackList");
+        } else if (brokerProperties.isMqttPasswordMust() && !authService.checkValid(username, password)) {
+            // 用户名和密码验证, 这里要求客户端连接时必须提供用户名和密码, 不管是否设置用户名标志和密码标志为1, 此处没有参考标准协议实现
+            returnCode = MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD;
+            LOGGER.warn("CONNECT [rejected] - clientId: {}, username: {} login with failed password", clientId, username);
+        } else {
+            returnCode = MqttConnectReturnCode.CONNECTION_ACCEPTED;
         }
 
-        if (brokerProperties.isMqttPasswordMust()) {
-            // 用户名和密码验证, 这里要求客户端连接时必须提供用户名和密码, 不管是否设置用户名标志和密码标志为1, 此处没有参考标准协议实现
-            String username = msg.payload().userName();
-            String password = msg.payload().passwordInBytes() == null ? null : new String(msg.payload().passwordInBytes(), StandardCharsets.UTF_8);
-            if (!authService.checkValid(username, password)) {
-                LOGGER.info("user: {} login with failed password", username);
-                MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                        new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                        new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD, false),
-                        null);
-                packetService.Log("CONNACK", msg.payload().clientIdentifier(), null,
-                        "[C <- S] : MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD", msg.fixedHeader().qosLevel().toString());
-
-                channel.writeAndFlush(connAckMessage);
-                channel.close();
-                return;
-            }
+        if (returnCode != MqttConnectReturnCode.CONNECTION_ACCEPTED) {
+            channel.writeAndFlush(MqttMessageHelper.getConnectAckMessage(returnCode, false));
+            channel.close();
         }
 
         // 如果会话中已存储这个新连接的clientId, 需要开辟新的会话的话，就关闭之前该clientId的连接
-        String clientId = msg.payload().clientIdentifier();
         if (sessionStoreService.containsKey(clientId)) {
             SessionStore sessionStore = sessionStoreService.get(clientId);
             // 全新的会话
@@ -145,8 +141,7 @@ public class Connect {
                 msg.variableHeader().isCleanSession(), null, expire);
         if (msg.variableHeader().isWillFlag()) {
             MqttPublishMessage willMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
-                    new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.valueOf(msg.variableHeader().willQos()),
-                            msg.variableHeader().isWillRetain(), 0),
+                    new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.valueOf(msg.variableHeader().willQos()), msg.variableHeader().isWillRetain(), 0),
                     new MqttPublishVariableHeader(msg.payload().willTopic(), 0),
                     Unpooled.buffer().writeBytes(msg.payload().willMessageInBytes()));
             sessionStore.setWillMessage(willMessage);
@@ -156,14 +151,12 @@ public class Connect {
         sessionStoreService.put(clientId, sessionStore, expire);
         // 将clientId存储到channel的map中
         channel.attr(AttributeKey.valueOf("clientId")).set(clientId);
-        boolean sessionPresent = sessionStoreService.containsKey(clientId) && !msg.variableHeader().isCleanSession();
+        sessionPresent = sessionStoreService.containsKey(clientId) && !msg.variableHeader().isCleanSession();
         MqttConnAckMessage okResp = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                 new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_ACCEPTED, sessionPresent), null);
-        LOGGER.info("CONNACK - to clientId: {}, cleanSession: {} established", clientId, msg.variableHeader().isCleanSession());
-        packetService.Log("CONNACK", msg.payload().clientIdentifier(), null,
-                "[C <- S] : MqttConnectReturnCode.CONNECTION_ACCEPTED established", msg.fixedHeader().qosLevel().toString());
 
+        LOGGER.info("CONNACK [C <- S] - to clientId: {}, cleanSession: {} established", clientId, msg.variableHeader().isCleanSession());
         channel.writeAndFlush(okResp);
 
         // 如果cleanSession为0则表示复用之前的session, 需要重发此clientId存储的未完成的QoS1和QoS2的DUP消息
@@ -176,20 +169,15 @@ public class Connect {
                         new MqttFixedHeader(MqttMessageType.PUBLISH, true, MqttQoS.valueOf(dupPublishMessageStore.getMqttQoS()), false, 0),
                         new MqttPublishVariableHeader(dupPublishMessageStore.getTopic(), dupPublishMessageStore.getMessageId()),
                         Unpooled.buffer().writeBytes(dupPublishMessageStore.getMessageBytes()));
-
-                packetService.Log("PUBLISH", msg.payload().clientIdentifier(), dupPublishMessageStore.getTopic(),
-                        "[C <- S] : from old session", publishMessage.fixedHeader().qosLevel().toString());
                 channel.writeAndFlush(publishMessage);
             });
 
             dupPubRelMessageStoreList.forEach(dupPubRelMessageStore -> {
-                MqttMessage pubRelMessage = MqttMessageFactory.newMessage(
-                        new MqttFixedHeader(MqttMessageType.PUBREL, true, MqttQoS.AT_MOST_ONCE, false, 0),
-                        MqttMessageIdVariableHeader.from(dupPubRelMessageStore.getMessageId()),
-                        null);
-
-                packetService.Log("PUBREL", msg.payload().clientIdentifier(), null,
-                        "[C <- S] : from old session", pubRelMessage.fixedHeader().qosLevel().toString());
+                MqttMessage pubRelMessage = MqttMessageHelper.getPubRelMessage(dupPubRelMessageStore.getMessageId());
+                // MqttMessage pubRelMessage = MqttMessageFactory.newMessage(
+                //         new MqttFixedHeader(MqttMessageType.PUBREL, true, MqttQoS.AT_MOST_ONCE, false, 0),
+                //         MqttMessageIdVariableHeader.from(dupPubRelMessageStore.getMessageId()),
+                //         null);
                 channel.writeAndFlush(pubRelMessage);
             });
         }

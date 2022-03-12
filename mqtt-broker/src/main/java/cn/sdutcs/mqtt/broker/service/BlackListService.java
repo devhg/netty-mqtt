@@ -12,7 +12,7 @@ public class BlackListService {
     @Autowired
     BlackListMapper blackListMapper;
 
-    public boolean checkBlackList(String hostAddress) {
+    public boolean onBlackList(String hostAddress) {
         BlackIP blackIP = blackListMapper.getOne(hostAddress);
         if (null == blackIP) {
             return false;

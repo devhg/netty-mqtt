@@ -5,6 +5,7 @@ import cn.sdutcs.mqtt.broker.codec.MqttWebSocketCodec;
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.handler.BrokerHandler;
 import cn.sdutcs.mqtt.broker.handler.IpFilterRuleHandler;
+import cn.sdutcs.mqtt.broker.handler.TrafficHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
@@ -157,9 +158,8 @@ public class BrokerServer implements Lifecycle {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline pipeline = socketChannel.pipeline();
-                        // IP黑名单
-                        pipeline.addLast("ipFilter", ipFilterRuleHandler);
-
+                        // 流量监控
+                        // pipeline.addLast(TrafficHandler.trafficHandler);
                         // Netty提供的心跳检测
                         pipeline.addFirst("idle", new IdleStateHandler(brokerProperties.getKeepAlive(), 0, 0));
 
@@ -170,7 +170,6 @@ public class BrokerServer implements Lifecycle {
                             sslEngine.setNeedClientAuth(false);        // 不需要验证客户端
                             pipeline.addLast("ssl", new SslHandler(sslEngine));
                         }
-
                         pipeline.addLast("decoder", new MqttDecoder());
                         pipeline.addLast("encoder", MqttEncoder.INSTANCE);
                         pipeline.addLast("broker", context.getBean(BrokerHandler.class));

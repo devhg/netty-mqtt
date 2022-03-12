@@ -3,6 +3,7 @@ package cn.sdutcs.mqtt.broker.protocol;
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.internal.InternalCommunication;
 import cn.sdutcs.mqtt.broker.internal.MessageSender;
+import cn.sdutcs.mqtt.broker.service.BlackListService;
 import cn.sdutcs.mqtt.broker.service.PacketService;
 import cn.sdutcs.mqtt.common.auth.IAuthService;
 import cn.sdutcs.mqtt.common.message.IDupPubRelMessageStoreService;
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
-
 
 /**
  * 协议处理
@@ -50,7 +50,8 @@ public class ProtocolProcess {
     @Autowired
     private MessageSender messageSender;
     @Autowired
-    private PacketService packetService;
+    private BlackListService blackListService;
+
 
     private Connect connect;
     private Subscribe subscribe;
@@ -65,7 +66,8 @@ public class ProtocolProcess {
 
     public Connect connect() {
         if (connect == null) {
-            connect = new Connect(packetService, brokerProperties, authService, sessionStoreService,
+            connect = new Connect(brokerProperties, blackListService,
+                    authService, sessionStoreService,
                     subscribeStoreService, dupPublishMessageStoreService,
                     dupPubRelMessageStoreService, channelIdMap);
         }
@@ -74,15 +76,14 @@ public class ProtocolProcess {
 
     public Subscribe subscribe() {
         if (subscribe == null) {
-            subscribe = new Subscribe(packetService, messageIdService,
-                    retainMessageStoreService, subscribeStoreService);
+            subscribe = new Subscribe(messageIdService, retainMessageStoreService, subscribeStoreService);
         }
         return subscribe;
     }
 
     public UnSubscribe unSubscribe() {
         if (unSubscribe == null) {
-            unSubscribe = new UnSubscribe(packetService, subscribeStoreService);
+            unSubscribe = new UnSubscribe(subscribeStoreService);
         }
         return unSubscribe;
     }
@@ -99,8 +100,7 @@ public class ProtocolProcess {
 
     public DisConnect disConnect() {
         if (disConnect == null) {
-            disConnect = new DisConnect(packetService,
-                    sessionStoreService, subscribeStoreService,
+            disConnect = new DisConnect(sessionStoreService, subscribeStoreService,
                     dupPublishMessageStoreService, dupPubRelMessageStoreService,
                     messageSender);
         }
@@ -109,7 +109,7 @@ public class ProtocolProcess {
 
     public PingReq pingReq() {
         if (pingReq == null) {
-            pingReq = new PingReq(packetService, brokerProperties, channelIdMap, sessionStoreService);
+            pingReq = new PingReq(brokerProperties, channelIdMap, sessionStoreService);
         }
         return pingReq;
     }
@@ -123,21 +123,21 @@ public class ProtocolProcess {
 
     public PubAck pubAck() {
         if (pubAck == null) {
-            pubAck = new PubAck(packetService, dupPublishMessageStoreService);
+            pubAck = new PubAck(dupPublishMessageStoreService);
         }
         return pubAck;
     }
 
     public PubRec pubRec() {
         if (pubRec == null) {
-            pubRec = new PubRec(packetService, dupPublishMessageStoreService, dupPubRelMessageStoreService);
+            pubRec = new PubRec(dupPublishMessageStoreService, dupPubRelMessageStoreService);
         }
         return pubRec;
     }
 
     public PubComp pubComp() {
         if (pubComp == null) {
-            pubComp = new PubComp(packetService, dupPubRelMessageStoreService);
+            pubComp = new PubComp(dupPubRelMessageStoreService);
         }
         return pubComp;
     }

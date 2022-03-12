@@ -2,7 +2,10 @@ package cn.sdutcs.mqtt.store.cache;
 
 import cn.sdutcs.mqtt.common.message.DupPubRelMessageStore;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import redis.clients.jedis.UnifiedJedis;
 
@@ -14,16 +17,18 @@ public class DupPubRelMessageCache {
     private final static String CACHE_PRE = "mqtt:pubrel:";
 
     @Autowired
-    private UnifiedJedis redisService;
+    private RedisTemplate<String, String> redisTemplate;
 
     public DupPubRelMessageStore put(String clientId, Integer messageId, DupPubRelMessageStore dupPubRelMessageStore) {
-        redisService.hset(CACHE_PRE + clientId, String.valueOf(messageId), JSONObject.toJSONString(dupPubRelMessageStore));
+        HashOperations<String, Object, Object> hash = redisTemplate.opsForHash();
+        hash.put(CACHE_PRE + clientId, String.valueOf(messageId), JSONObject.toJSONString(dupPubRelMessageStore));
         return dupPubRelMessageStore;
     }
 
     public ConcurrentHashMap<Integer, DupPubRelMessageStore> get(String clientId) {
         ConcurrentHashMap<Integer, DupPubRelMessageStore> result = new ConcurrentHashMap<>();
-        Map<String, String> map1 = redisService.hgetAll(CACHE_PRE + clientId);
+        HashOperations<String, String, String> hash = redisTemplate.opsForHash();
+        Map<String, String> map1 = hash.entries(CACHE_PRE + clientId);
         if (map1 != null && !map1.isEmpty()) {
             map1.forEach((k, v) -> {
                 result.put(Integer.valueOf(k), JSONObject.parseObject(v, DupPubRelMessageStore.class));
@@ -33,14 +38,14 @@ public class DupPubRelMessageCache {
     }
 
     public boolean containsKey(String clientId) {
-        return redisService.exists(CACHE_PRE + clientId);
+        return Boolean.TRUE.equals(redisTemplate.hasKey(CACHE_PRE + clientId));
     }
 
     public void remove(String clientId, Integer messageId) {
-        redisService.hdel(CACHE_PRE + clientId, String.valueOf(messageId));
+        redisTemplate.opsForHash().delete(CACHE_PRE + clientId, String.valueOf(messageId));
     }
 
     public void remove(String clientId) {
-        redisService.del(CACHE_PRE + clientId);
+        redisTemplate.delete(CACHE_PRE + clientId);
     }
 }

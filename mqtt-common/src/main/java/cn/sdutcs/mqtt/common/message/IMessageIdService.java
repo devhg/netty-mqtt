@@ -7,6 +7,7 @@ public interface IMessageIdService {
 
     /**
      * 获取报文标识符
+     * @return
      */
     int getNextMessageId();
 }

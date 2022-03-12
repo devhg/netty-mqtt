@@ -39,6 +39,6 @@ public class InternalCommunication {
             redisCluster.sendMessage(internalMessage);
         }
 
-        LOGGER.info("消息转发 {}", internalMessage);
+        // LOGGER.info("消息转发 {}", internalMessage);
     }
 }

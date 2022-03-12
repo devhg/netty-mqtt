@@ -4,8 +4,8 @@ import cn.sdutcs.mqtt.common.message.IMessageIdService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import redis.clients.jedis.UnifiedJedis;
 
 import javax.annotation.PostConstruct;
 
@@ -14,13 +14,13 @@ public class MessageIdService implements IMessageIdService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageIdService.class);
 
     @Autowired
-    private UnifiedJedis redisService;
+    private RedisTemplate<String, String> redisTemplate;
 
     @Override
     public int getNextMessageId() {
         try {
             while (true) {
-                int nextMsgId = (int) (redisService.incr("mqtt:messageid:num") % 65536);
+                int nextMsgId = Math.toIntExact(redisTemplate.opsForValue().increment("mqtt:messageid:num") % 65536);
                 if (nextMsgId > 0) {
                     return nextMsgId;
                 }
@@ -36,8 +36,8 @@ public class MessageIdService implements IMessageIdService {
      */
     @PostConstruct
     public void init() {
-        if (redisService.exists("mqtt:messageid:num")) {
-            redisService.del("mqtt:messageid:num");
+        if (Boolean.TRUE.equals(redisTemplate.hasKey("mqtt:messageid:num"))) {
+            redisTemplate.delete("mqtt:messageid:num");
         }
     }
 }
