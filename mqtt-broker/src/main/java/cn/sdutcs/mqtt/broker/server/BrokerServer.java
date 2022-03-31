@@ -4,8 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.sdutcs.mqtt.broker.codec.MqttWebSocketCodec;
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.handler.BrokerHandler;
-import cn.sdutcs.mqtt.broker.handler.IpFilterRuleHandler;
-import cn.sdutcs.mqtt.broker.handler.TrafficHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
@@ -46,8 +44,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class BrokerServer implements Lifecycle {
-    private static final Logger logger = LoggerFactory.getLogger(BrokerServer.class);
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BrokerServer.class);
     private volatile boolean running = false;
 
     @Autowired
@@ -66,10 +64,6 @@ public class BrokerServer implements Lifecycle {
     private Channel channel;
     private Channel websocketChannel;
 
-    // ip黑名单
-    @Autowired
-    IpFilterRuleHandler ipFilterRuleHandler;
-
     public BrokerServer() {
         channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
         channelIdMap = new ConcurrentHashMap<>();
@@ -80,7 +74,10 @@ public class BrokerServer implements Lifecycle {
     @SneakyThrows
     @Override
     public void start() {
-        logger.info("Initializing {} MQTT Broker ...", "[" + brokerProperties.getId() + "]");
+        LOGGER.info("Initializing {} MQTT Broker ...", "[" + brokerProperties.getId() + "]");
+        LOGGER.debug("debug");
+        LOGGER.warn("warn");
+        LOGGER.error("error");
 
         // 开启SSL
         if (brokerProperties.getSslEnabled()) {
@@ -95,12 +92,12 @@ public class BrokerServer implements Lifecycle {
         runMqttServer();
         if (brokerProperties.getWsEnabled()) {
             runWebSocketServer();
-            logger.info("MQTT Broker {} is up and running. Open Port: {} WebSocketPort: {}",
+            LOGGER.info("MQTT Broker {} is up and running. Open Port: {} WebSocketPort: {}",
                     "[" + brokerProperties.getId() + "]",
                     brokerProperties.getPort(),
                     brokerProperties.getWsPort());
         } else {
-            logger.info("MQTT Broker {} is up and running. Open Port: {} ",
+            LOGGER.info("MQTT Broker {} is up and running. Open Port: {} ",
                     "[" + brokerProperties.getId() + "]",
                     brokerProperties.getPort());
         }
@@ -109,7 +106,7 @@ public class BrokerServer implements Lifecycle {
 
     @Override
     public void stop() {
-        logger.info("Shutdown {} MQTT Broker ...", "[" + brokerProperties.getId() + "]");
+        LOGGER.info("Shutdown {} MQTT Broker ...", "[" + brokerProperties.getId() + "]");
         channelGroup = null;
         channelIdMap = null;
         bossGroup.shutdownGracefully();
@@ -123,7 +120,7 @@ public class BrokerServer implements Lifecycle {
             websocketChannel = null;
         }
         running = false;
-        logger.info("MQTT Broker {} shutdown finish.", "[" + brokerProperties.getId() + "]");
+        LOGGER.info("MQTT Broker {} shutdown finish.", "[" + brokerProperties.getId() + "]");
     }
 
     @Override

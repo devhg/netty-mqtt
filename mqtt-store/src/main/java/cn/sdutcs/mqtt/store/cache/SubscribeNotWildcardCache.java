@@ -5,9 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Repository;
-import redis.clients.jedis.*;
 import redis.clients.jedis.params.ScanParams;
-import redis.clients.jedis.resps.ScanResult;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;

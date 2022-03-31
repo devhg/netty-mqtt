@@ -4,7 +4,6 @@ import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.internal.InternalCommunication;
 import cn.sdutcs.mqtt.broker.internal.MessageSender;
 import cn.sdutcs.mqtt.broker.service.BlackListService;
-import cn.sdutcs.mqtt.broker.service.PacketService;
 import cn.sdutcs.mqtt.common.auth.IAuthService;
 import cn.sdutcs.mqtt.common.message.IDupPubRelMessageStoreService;
 import cn.sdutcs.mqtt.common.message.IDupPublishMessageStoreService;
@@ -69,7 +68,7 @@ public class ProtocolProcess {
             connect = new Connect(brokerProperties, blackListService,
                     authService, sessionStoreService,
                     subscribeStoreService, dupPublishMessageStoreService,
-                    dupPubRelMessageStoreService, channelIdMap);
+                    dupPubRelMessageStoreService, channelGroup, channelIdMap);
         }
         return connect;
     }

@@ -5,12 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Repository;
-import redis.clients.jedis.*;
-import redis.clients.jedis.commands.JedisCommands;
 import redis.clients.jedis.params.ScanParams;
-import redis.clients.jedis.resps.ScanResult;
 
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +21,6 @@ public class SubscribeWildcardCache {
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
-
 
     public SubscribeStore put(String topic, String clientId, SubscribeStore subscribeStore) {
         HashOperations<String, Object, Object> hash = redisTemplate.opsForHash();

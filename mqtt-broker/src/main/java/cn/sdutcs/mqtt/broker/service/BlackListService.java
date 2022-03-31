@@ -1,11 +1,9 @@
 package cn.sdutcs.mqtt.broker.service;
 
-import cn.sdutcs.mqtt.broker.web.dao.BlackListMapper;
-import cn.sdutcs.mqtt.broker.web.model.BlackIP;
+import cn.sdutcs.mqtt.broker.domain.BlackIP;
+import cn.sdutcs.mqtt.broker.dao.BlackListMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class BlackListService {
@@ -13,29 +11,14 @@ public class BlackListService {
     BlackListMapper blackListMapper;
 
     public boolean onBlackList(String hostAddress) {
-        BlackIP blackIP = blackListMapper.getOne(hostAddress);
+        // System.out.println("hostAddress = " + hostAddress); // 127.0.0.1:52272
+        // todo 支持 127.0.0.1:*
+        String[] hostPort = hostAddress.split(":");
+        // System.out.println(hostPort[0]);
+        BlackIP blackIP = blackListMapper.getOne(hostPort[0]);
         if (null == blackIP) {
             return false;
         }
         return blackIP.getStatus() == 1;
-    }
-
-    public boolean addIPToBlackList(BlackIP ip) {
-        int affectedRows = blackListMapper.insert(ip);
-        return affectedRows == 1;
-    }
-
-    public boolean updateIPToBlackList(BlackIP ip) {
-        int affectedRows = blackListMapper.update(ip);
-        return affectedRows == 1;
-    }
-
-    public boolean deleteIPFromBlackList(Long ipID) {
-        int affectedRows = blackListMapper.delete(ipID);
-        return affectedRows == 1;
-    }
-
-    public List<BlackIP> fetchIPBlackList(String ip, String opUser) {
-        return blackListMapper.getAll(ip, opUser);
     }
 }

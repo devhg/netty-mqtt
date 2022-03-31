@@ -1,6 +1,6 @@
-package cn.sdutcs.mqtt.broker.web.dao;
+package cn.sdutcs.mqtt.panel.dao;
 
-import cn.sdutcs.mqtt.broker.web.model.User;
+import cn.sdutcs.mqtt.panel.model.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

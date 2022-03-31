@@ -1,6 +1,5 @@
 package cn.sdutcs.mqtt.broker.internal;
 
-import cn.sdutcs.mqtt.broker.cluster.RedisCluster;
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.service.KafkaService;
 import org.slf4j.Logger;
@@ -20,8 +19,8 @@ public class InternalCommunication {
     private BrokerConfig brokerProperties;
     @Autowired
     private KafkaService kafkaService;
-    @Autowired
-    private RedisCluster redisCluster;
+    // @Autowired
+    // private RedisCluster redisCluster;
 
     public void internalSend(InternalMessage internalMessage) {
         String name = ManagementFactory.getRuntimeMXBean().getName();
@@ -36,7 +35,7 @@ public class InternalCommunication {
         }
         // 如果开启redis-cluster集群功能
         if (brokerProperties.isClusterEnabled()) {
-            redisCluster.sendMessage(internalMessage);
+            // redisCluster.sendMessage(internalMessage);
         }
 
         // LOGGER.info("消息转发 {}", internalMessage);

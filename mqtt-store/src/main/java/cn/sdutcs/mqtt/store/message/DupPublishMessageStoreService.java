@@ -1,6 +1,5 @@
 package cn.sdutcs.mqtt.store.message;
 
-
 import cn.sdutcs.mqtt.common.message.DupPublishMessageStore;
 import cn.sdutcs.mqtt.common.message.IDupPublishMessageStoreService;
 import cn.sdutcs.mqtt.common.message.IMessageIdService;

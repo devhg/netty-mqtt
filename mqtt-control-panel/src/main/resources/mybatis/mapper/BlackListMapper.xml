@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="cn.sdutcs.mqtt.broker.dao.BlackListMapper">
+<mapper namespace="cn.sdutcs.mqtt.panel.dao.BlackListMapper">
 
-    <resultMap id="BaseResultMap" type="cn.sdutcs.mqtt.broker.domain.BlackIP">
+    <resultMap id="BaseResultMap" type="cn.sdutcs.mqtt.panel.model.BlackIP">
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="ip" property="ip" jdbcType="VARCHAR"/>
         <result column="op_user" property="opUser" jdbcType="INTEGER"/>
@@ -21,6 +21,26 @@
             </if>
         </where>
     </select>
+
+    <insert id="insert" parameterType="cn.sdutcs.mqtt.panel.model.User">
+        INSERT INTO ip_black_list
+            (ip, op_user, status, create_time)
+        VALUES (#{ip}, #{opUser}, #{status}, NOW())
+    </insert>
+
+    <update id="update" parameterType="cn.sdutcs.mqtt.panel.model.User">
+        UPDATE ip_black_list
+        SET ip=#{ip},
+            status=#{status},
+            op_user=#{opUser}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.Long">
+        DELETE
+        FROM ip_black_list
+        WHERE id = #{id}
+    </delete>
 
     <select id="getOne" parameterType="java.lang.String" resultMap="BaseResultMap">
         SELECT id, ip, op_user, status, create_time

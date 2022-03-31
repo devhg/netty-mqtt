@@ -1,7 +1,7 @@
-package cn.sdutcs.mqtt.broker.web.controller;
+package cn.sdutcs.mqtt.panel.controller;
 
-import cn.sdutcs.mqtt.broker.web.model.User;
-import cn.sdutcs.mqtt.broker.web.dao.UserMapper;
+import cn.sdutcs.mqtt.panel.dao.UserMapper;
+import cn.sdutcs.mqtt.panel.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

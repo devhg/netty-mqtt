@@ -1,6 +1,6 @@
-package cn.sdutcs.mqtt.broker.web.dao;
+package cn.sdutcs.mqtt.panel.dao;
 
-import cn.sdutcs.mqtt.common.record.Packet;
+import cn.sdutcs.mqtt.panel.model.Packet;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 

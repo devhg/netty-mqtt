@@ -10,9 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import redis.clients.jedis.UnifiedJedis;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +23,6 @@ import java.util.stream.Collectors;
 @Service
 public class SessionStoreService implements ISessionStoreService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionStoreService.class);
     private final static String CACHE_PRE = "mqtt:session:";
 
     @Autowired

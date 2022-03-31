@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="cn.sdutcs.mqtt.broker.web.dao.PacketMapper">
+<mapper namespace="cn.sdutcs.mqtt.panel.dao.PacketMapper">
 
-    <resultMap id="userMap" type="cn.sdutcs.mqtt.common.record.Packet">
+    <resultMap id="userMap" type="cn.sdutcs.mqtt.panel.model.Packet">
         <id column="packet_id" property="packetId" jdbcType="BIGINT"/>
         <result column="packet_type" property="packetType" jdbcType="VARCHAR"/>
         <result column="client_id" property="clientId" jdbcType="VARCHAR"/>
@@ -12,7 +12,7 @@
         <result column="create_time" property="createTime" javaType="DATE"/>
     </resultMap>
 
-    <insert id="insertPacket" parameterType="cn.sdutcs.mqtt.common.record.Packet">
+    <insert id="insertPacket" parameterType="cn.sdutcs.mqtt.panel.model.Packet">
         insert into packet_info(packet_type, client_id, topic, packet_info, qos)
         values (#{packetType}, #{clientId}, #{topic}, #{packetInfo}, #{qos})
     </insert>

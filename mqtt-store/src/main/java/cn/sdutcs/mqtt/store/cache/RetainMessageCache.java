@@ -47,12 +47,6 @@ public class RetainMessageCache {
         ScanParams match = new ScanParams().match(CACHE_PRE + "*");
         Set<String> keys = new HashSet<>();
         try {
-            // ScanResult<String> scan = null;
-            // do {
-            //     scan = redisService.scan(scan == null ? ScanParams.SCAN_POINTER_START : scan.getCursor(), match);
-            //     keys.addAll(scan.getResult());
-            // } while (!scan.isCompleteIteration());
-
             redisTemplate.execute((RedisCallback<Set<String>>) connection -> {
                 try (Cursor<byte[]> cursor = connection.scan(new ScanOptions.ScanOptionsBuilder()
                         .match(CACHE_PRE + "*")

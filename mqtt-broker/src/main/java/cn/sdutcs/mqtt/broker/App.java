@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication(scanBasePackages = "cn.sdutcs.mqtt")
-@MapperScan("cn.sdutcs.mqtt.broker.web")
+@MapperScan("cn.sdutcs.mqtt.broker.dao")
 public class App implements CommandLineRunner {
     @Autowired
     BrokerConfig config;

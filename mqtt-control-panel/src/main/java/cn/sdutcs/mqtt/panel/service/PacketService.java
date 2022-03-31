@@ -1,8 +1,7 @@
-package cn.sdutcs.mqtt.broker.service;
+package cn.sdutcs.mqtt.panel.service;
 
-import cn.sdutcs.mqtt.broker.handler.BrokerHandler;
-import cn.sdutcs.mqtt.broker.web.dao.PacketMapper;
-import cn.sdutcs.mqtt.common.record.Packet;
+import cn.sdutcs.mqtt.panel.dao.PacketMapper;
+import cn.sdutcs.mqtt.panel.model.Packet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -40,5 +40,4 @@ public class KafkaService {
             LOGGER.error("kafka没有连接成功..");
         }
     }
-
 }

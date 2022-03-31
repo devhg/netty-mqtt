@@ -1,7 +1,6 @@
 package cn.sdutcs.mqtt.broker.protocol;
 
 import cn.sdutcs.mqtt.broker.internal.MessageSender;
-import cn.sdutcs.mqtt.broker.service.PacketService;
 import cn.sdutcs.mqtt.common.message.IDupPubRelMessageStoreService;
 import cn.sdutcs.mqtt.common.message.IDupPublishMessageStoreService;
 import cn.sdutcs.mqtt.common.session.ISessionStoreService;
@@ -9,7 +8,6 @@ import cn.sdutcs.mqtt.common.session.SessionStore;
 import cn.sdutcs.mqtt.common.subscribe.ISubscribeStoreService;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttMessage;
-import io.netty.handler.codec.mqtt.MqttQoS;
 import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

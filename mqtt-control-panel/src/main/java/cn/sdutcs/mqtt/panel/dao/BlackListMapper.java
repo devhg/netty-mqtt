@@ -1,6 +1,6 @@
-package cn.sdutcs.mqtt.broker.web.dao;
+package cn.sdutcs.mqtt.panel.dao;
 
-import cn.sdutcs.mqtt.broker.web.model.BlackIP;
+import cn.sdutcs.mqtt.panel.model.BlackIP;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 

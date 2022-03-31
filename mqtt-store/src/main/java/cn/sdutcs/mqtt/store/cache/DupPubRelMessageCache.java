@@ -2,12 +2,10 @@ package cn.sdutcs.mqtt.store.cache;
 
 import cn.sdutcs.mqtt.common.message.DupPubRelMessageStore;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
-import redis.clients.jedis.UnifiedJedis;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

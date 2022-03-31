@@ -1,8 +1,8 @@
-package cn.sdutcs.mqtt.broker.web.controller;
+package cn.sdutcs.mqtt.panel.controller;
 
-import cn.sdutcs.mqtt.broker.service.BlackListService;
-import cn.sdutcs.mqtt.broker.web.model.BlackIP;
-import cn.sdutcs.mqtt.broker.web.model.Result;
+import cn.sdutcs.mqtt.panel.model.BlackIP;
+import cn.sdutcs.mqtt.panel.model.Result;
+import cn.sdutcs.mqtt.panel.service.BlackListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
