@@ -75,7 +75,7 @@ public class SessionStoreService implements ISessionStoreService {
             if (StrUtil.isNotBlank(jsonObj)) {
                 return JSON.parseObject(jsonObj, Map.class);
             } else {
-                return new SessionStore(storeStarter.PROP_INSTANCENAME, clientId, "unActive").toMap();
+                return new SessionStore(storeStarter.PROP_INSTANCE_NAME, clientId, "unActive").toMap();
             }
         }).collect(Collectors.toList());
     }

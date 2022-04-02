@@ -8,9 +8,6 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Repository;
-import redis.clients.jedis.*;
-import redis.clients.jedis.params.ScanParams;
-import redis.clients.jedis.resps.ScanResult;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -44,7 +41,7 @@ public class RetainMessageCache {
      * 获取全部key(topic)
      */
     public List<String> keys() {
-        ScanParams match = new ScanParams().match(CACHE_PRE + "*");
+        // ScanParams match = new ScanParams().match(CACHE_PRE + "*");
         Set<String> keys = new HashSet<>();
         try {
             redisTemplate.execute((RedisCallback<Set<String>>) connection -> {

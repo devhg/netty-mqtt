@@ -34,6 +34,8 @@ public class MessageSender {
     @Autowired
     private ISessionStoreService sessionStoreService;
     @Autowired
+    private InternalCommunication internalCommunication;
+    @Autowired
     private IDupPublishMessageStoreService dupPublishMessageStoreService;
     @Autowired
     private ConcurrentHashMap<String, ChannelId> channelIdMap;
@@ -55,9 +57,9 @@ public class MessageSender {
                     MqttPublishMessage pubMessage = MqttMessageHelper.getPubMessage(deviceMessage, 0);
 
                     LOGGER.info("PUBLISH [C <- S] - from clientId: {} to clientId: {}, topic: {}, Qos: {}", fromClientId, clientId, topic, respQoS.value());
-                    this.sendToChannel(clientId, pubMessage);
+                    this.sendToChannel(clientId, pubMessage, messageBytes);
                 }
-                // Qos=1
+                // Qos=1 2
                 if (respQoS == MqttQoS.AT_LEAST_ONCE || respQoS == MqttQoS.EXACTLY_ONCE) {
                     int messageId = messageIdService.getNextMessageId();
                     DeviceMessage deviceMessage = DeviceMessageBuilder.buildDeviceMessage(retain, dup, respQoS.value(), topic, messageBytes);
@@ -68,13 +70,13 @@ public class MessageSender {
                     dupPublishMessageStoreService.put(clientId, dupPublishMessageStore);
 
                     LOGGER.info("PUBLISH [C <- S] - from clientId: {} to clientId: {}, topic: {}, Qos: {}, messageId: {}", fromClientId, clientId, topic, respQoS.value(), messageId);
-                    this.sendToChannel(clientId, pubMessage);
+                    this.sendToChannel(clientId, pubMessage, messageBytes);
                 }
             }
         });
     }
 
-    private void sendToChannel(String clientId, MqttPublishMessage publishMessage) {
+    private void sendToChannel(String clientId, MqttPublishMessage publishMessage, byte[] messageBytes) {
         SessionStore sessionStore = sessionStoreService.get(clientId);
         ChannelId channelId = channelIdMap.get(sessionStore.getBrokerId() + "_" + sessionStore.getChannelId());
         if (channelId != null) {
@@ -83,6 +85,13 @@ public class MessageSender {
                 channel.writeAndFlush(publishMessage);
                 // 消息发送完毕，session续期
                 sessionStoreService.expire(clientId, sessionStore.getExpire());
+
+                // kafka 总线引擎转发 2022.04.01
+                InternalMessage internalMessage = new InternalMessage().setTopic(publishMessage.variableHeader().topicName())
+                        .setMqttQoS(publishMessage.fixedHeader().qosLevel().value())
+                        .setMessageBytes(messageBytes)
+                        .setDup(false).setRetain(false).setClientId(clientId);
+                internalCommunication.internalSend(internalMessage);
             } else {
                 // 没有找到channel，说明会话已经结束
                 this.sendWillMessage(sessionStore.getClientId(), sessionStore.getWillMessage());
@@ -91,9 +100,6 @@ public class MessageSender {
         }
     }
 
-    /**
-     * 发送遗嘱消息
-     */
     public void sendWillMessage(String fromClientId, MqttPublishMessage willMessage) {
         if (willMessage == null) {
             return;

@@ -6,7 +6,7 @@ public enum MessageSourceEnum {
 
     PLATFORM("PLATFORM");
 
-    private String code;
+    private final String code;
 
     MessageSourceEnum(String code) {
         this.code = code;

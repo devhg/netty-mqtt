@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public class DupPubRelMessageStore implements Serializable {
 
-    private static final long serialVersionUID = -4811909730136687408L;
+    private static final long serialVersionUID = 1805904749170667859L;
 
     private String clientId;
 

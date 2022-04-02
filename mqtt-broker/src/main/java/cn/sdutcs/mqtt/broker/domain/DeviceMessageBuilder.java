@@ -39,5 +39,4 @@ public class DeviceMessageBuilder {
                 mqttPublishMessage.variableHeader().topicName(),
                 MqttMessageHelper.readBytesFromByteBuf(mqttPublishMessage.content()));
     }
-
 }

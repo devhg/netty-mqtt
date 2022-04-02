@@ -72,7 +72,7 @@ public class SubscribeStoreService implements ISubscribeStoreService {
             }
 
         });
-        LOGGER.debug("broker={} forward message to topic={}, count SubscribeStores={}", storeStarter.getPROP_INSTANCENAME(),
+        LOGGER.debug("broker={} forward message to topic={}, count SubscribeStores={}", storeStarter.getPROP_INSTANCE_NAME(),
                 topic, subscribeStores.size());
         return subscribeStores;
     }

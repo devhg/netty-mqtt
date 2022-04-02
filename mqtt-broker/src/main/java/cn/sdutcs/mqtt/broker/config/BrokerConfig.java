@@ -63,10 +63,4 @@ public class BrokerConfig {
 
     @Value("${mqtt.broker.kafka.producer.topic:mqtt}")
     private String kafkaProducerTopic;
-
-    /**
-     * 是否Redis开启集群
-     */
-    @Value("${mqtt.broker.cluster-enabled:false}")
-    private boolean clusterEnabled;
 }

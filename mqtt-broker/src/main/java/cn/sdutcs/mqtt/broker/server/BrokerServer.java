@@ -4,6 +4,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.sdutcs.mqtt.broker.codec.MqttWebSocketCodec;
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.handler.BrokerHandler;
+import cn.sdutcs.mqtt.broker.internal.InternalCommunication;
+import cn.sdutcs.mqtt.broker.internal.InternalMessage;
+import cn.sdutcs.mqtt.broker.service.KafkaService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
@@ -34,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.stereotype.Component;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -52,6 +56,11 @@ public class BrokerServer implements Lifecycle {
     BrokerConfig brokerProperties;
     @Autowired
     ApplicationContext context;
+    @Autowired
+    InternalCommunication internalCommunication;
+
+    @Autowired
+    private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
@@ -89,6 +98,17 @@ public class BrokerServer implements Lifecycle {
             sslContext = SslContextBuilder.forServer(kmf).build();
         }
 
+        // 开启Kafka数据总线监听
+        if (brokerProperties.isKafkaBrokerEnabled()) {
+            LOGGER.info("KafkaListener start...");
+            kafkaListenerEndpointRegistry.getListenerContainer(KafkaService.KAFKA_LISTENER_ID).start();
+
+            // 测试发送
+            InternalMessage internalMessage = new InternalMessage();
+            internalMessage.setBrokerId("213131");
+            internalCommunication.internalSend(internalMessage);
+        }
+
         runMqttServer();
         if (brokerProperties.getWsEnabled()) {
             runWebSocketServer();
@@ -118,6 +138,10 @@ public class BrokerServer implements Lifecycle {
         if (brokerProperties.getWsEnabled()) {
             websocketChannel.closeFuture().syncUninterruptibly();
             websocketChannel = null;
+        }
+        if (brokerProperties.isKafkaBrokerEnabled()) {
+            LOGGER.info("KafkaListener stop...");
+            kafkaListenerEndpointRegistry.getListenerContainer(KafkaService.KAFKA_LISTENER_ID).stop();
         }
         running = false;
         LOGGER.info("MQTT Broker {} shutdown finish.", "[" + brokerProperties.getId() + "]");

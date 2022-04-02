@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Repository;
-import redis.clients.jedis.params.ScanParams;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -58,7 +57,7 @@ public class SubscribeWildcardCache {
 
     public Map<String, ConcurrentHashMap<String, SubscribeStore>> all() {
         Map<String, ConcurrentHashMap<String, SubscribeStore>> result = new HashMap<>();
-        ScanParams match = new ScanParams().match(CACHE_PRE + "*");
+        // ScanParams match = new ScanParams().match(CACHE_PRE + "*");
         Set<String> keys = new HashSet<>();
         try {
             // ScanResult<String> scan = null;
