@@ -38,5 +38,5 @@
 
 ## 理想架构图
 ![](https://image-ihui.oss-cn-beijing.aliyuncs.com/img/20220403231318.png)
-
-![](https://image-ihui.oss-cn-beijing.aliyuncs.com/img/20220403231420.png)
+![](https://image-ihui.oss-cn-beijing.aliyuncs.com/img/20220403231819.png)
+![](https://image-ihui.oss-cn-beijing.aliyuncs.com/img/20220403231833.png)
