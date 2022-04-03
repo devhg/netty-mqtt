@@ -70,7 +70,7 @@ public class PacketController {
 
     @GetMapping("/packets_per_second")
     public Result<Object> getPacketsPerSecond(@RequestParam(name = "t") String time) {
-        Map<String, Object> data = packetService.getPacketsTotal(time);
+        Map<String, Object> data = packetService.getPacketsSumPerSecond(time);
         return Result.success(data);
     }
 }

@@ -43,7 +43,7 @@ public class PacketService {
         return packetMapper.getPacketsTotal(clientId, fromTime, toTime);
     }
 
-    public Map<String, Object> getPacketsTotal(String time) {
+    public Map<String, Object> getPacketsSumPerSecond(String time) {
         long t = Long.parseLong(time);
         Timestamp toTime = new Timestamp(t);
         Timestamp fromTime = new Timestamp(t - 2000);

@@ -20,6 +20,7 @@
         <module>mqtt-auth</module>
         <module>mqtt-common</module>
         <module>mqtt-store</module>
+        <module>mqtt-control-panel</module>
     </modules>
 
     <properties>

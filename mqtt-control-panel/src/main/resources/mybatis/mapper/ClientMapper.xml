@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.sdutcs.mqtt.panel.dao.ClientMapper">
+
+    <resultMap id="BaseResultMap" type="cn.sdutcs.mqtt.panel.model.ClientPo">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="client_id" property="clientId" jdbcType="VARCHAR"/>
+        <result column="client_name" property="clientName" jdbcType="VARCHAR"/>
+        <result column="group_name" property="groupName" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="op_user" property="opUser" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" javaType="DATE"/>
+    </resultMap>
+
+    <select id="fetchAllClients" resultMap="BaseResultMap">
+        SELECT id, client_id, client_name, group_name, email, phone, op_user, create_time
+        FROM client_list
+        <where>
+            <if test="groupName != null">
+                and group_name=#{groupName}
+            </if>
+            <if test="opUser != null">
+                and op_user=#{opUser}
+            </if>
+            and delete_sign=0
+        </where>
+        order by create_time desc, id limit #{limit} offset #{offset}
+    </select>
+
+    <select id="countClientTotal" resultType="java.lang.Integer">
+        select count(1) as cnt
+        from client_list
+        <where>
+            <if test="groupName != null">
+                and group_name=#{groupName}
+            </if>
+            <if test="opUser != null">
+                and op_user=#{opUser}
+            </if>
+        </where>
+    </select>
+
+    <select id="getClientByName" resultMap="BaseResultMap">
+        SELECT id,
+               client_id,
+               client_name,
+               group_name,
+               email,
+               phone,
+               op_user,
+               create_time
+        FROM client_list
+        where client_name = #{clientName}
+    </select>
+
+    <insert id="insert" parameterType="cn.sdutcs.mqtt.panel.model.User">
+        INSERT INTO client_list
+        (client_id, client_name, group_name, email, phone, op_user, create_time)
+        VALUES (#{clientId}, #{clientName}, #{groupName}, #{email}, #{phone}, #{opUser}, NOW())
+    </insert>
+
+    <update id="updateClientIdByName">
+        UPDATE client_list
+        SET client_id=#{clientId}
+        WHERE client_name = #{clientName}
+    </update>
+
+    <update id="deleteClientById" parameterType="java.lang.Long">
+        UPDATE client_list
+        SET delete_sign=1
+        WHERE id = #{id}
+    </update>
+
+</mapper>
