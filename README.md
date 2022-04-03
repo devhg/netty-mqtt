@@ -35,3 +35,8 @@
 * 使用 netty 实现通信及协议解析
 * 使用 redis 实现消息缓存，集群
 * 使用 kafka 实现消息代理(可选)
+
+## 理想架构图
+![](https://image-ihui.oss-cn-beijing.aliyuncs.com/img/20220403231318.png)
+
+![](https://image-ihui.oss-cn-beijing.aliyuncs.com/img/20220403231420.png)
