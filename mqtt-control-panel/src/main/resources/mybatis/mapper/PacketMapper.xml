@@ -44,7 +44,7 @@
         </where>
     </select>
 
-    <select id="getPacketsSumPerSecond" resultType="java.util.HashMap">
+    <select id="getPacketsSumPerSecond" resultType="java.lang.Integer">
         select count(1) as y
         from packet_info
         where create_time between #{fromTime} and #{toTime}

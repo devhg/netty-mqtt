@@ -5,6 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 @PropertySource("classpath:application.properties")
 @Data
@@ -63,4 +66,19 @@ public class BrokerConfig {
 
     @Value("${mqtt.broker.kafka.producer.topic:mqtt}")
     private String kafkaProducerTopic;
+
+    public Map<String, Object> getConfigMap() {
+        Map<String, Object> configMap = new HashMap<>();
+        configMap.put("id", id);
+        configMap.put("hostAndPort", host + ":" + port);
+        configMap.put("mqttPasswordMust", mqttPasswordMust);
+        configMap.put("sslEnabled", sslEnabled);
+        configMap.put("wsEnabled", wsEnabled);
+        configMap.put("wsPort", wsPort);
+        configMap.put("soBacklog", soBacklog);
+        configMap.put("soKeepAlive", soKeepAlive);
+        configMap.put("kafkaBrokerEnabled", kafkaBrokerEnabled);
+        configMap.put("kafkaProducerTopic", kafkaProducerTopic);
+        return configMap;
+    }
 }

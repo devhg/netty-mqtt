@@ -13,8 +13,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 @MapperScan("cn.sdutcs.mqtt.broker.dao")
 public class App implements CommandLineRunner {
     @Autowired
-    BrokerConfig config;
-    @Autowired
     BrokerServer server;
 
     @Override

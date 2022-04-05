@@ -7,6 +7,7 @@ import cn.sdutcs.mqtt.broker.handler.BrokerHandler;
 import cn.sdutcs.mqtt.broker.internal.InternalCommunication;
 import cn.sdutcs.mqtt.broker.internal.InternalMessage;
 import cn.sdutcs.mqtt.broker.service.KafkaService;
+import cn.sdutcs.mqtt.broker.service.RedisService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
@@ -58,6 +59,8 @@ public class BrokerServer implements Lifecycle {
     ApplicationContext context;
     @Autowired
     InternalCommunication internalCommunication;
+    @Autowired
+    private RedisService redisService;
 
     @Autowired
     private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
@@ -84,9 +87,9 @@ public class BrokerServer implements Lifecycle {
     @Override
     public void start() {
         LOGGER.info("Initializing {} MQTT Broker ...", "[" + brokerProperties.getId() + "]");
-        LOGGER.debug("debug");
-        LOGGER.warn("warn");
-        LOGGER.error("error");
+
+        // 存储元信息
+        redisService.storeBrokerConfig();
 
         // 开启SSL
         if (brokerProperties.getSslEnabled()) {

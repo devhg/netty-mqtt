@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +54,9 @@ public class PacketService {
         String fromStr = sdf.format(fromTime);
         String toStr = sdf.format(toTime);
 
-        return packetMapper.getPacketsSumPerSecond(fromStr, toStr);
+        int sumPerSecond = packetMapper.getPacketsSumPerSecond(fromStr, toStr);
+        Map<String, Object> result = new HashMap<>();
+        result.put("y", sumPerSecond);
+        return result;
     }
 }

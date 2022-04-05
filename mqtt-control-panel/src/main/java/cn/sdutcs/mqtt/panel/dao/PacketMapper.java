@@ -22,7 +22,6 @@ public interface PacketMapper {
                         @Param("fromTime") String fromTime,
                         @Param("toTime") String toTime);
 
-    @MapKey("x")
-    Map<String, Object> getPacketsSumPerSecond(@Param("fromTime") String fromTime,
+    int getPacketsSumPerSecond(@Param("fromTime") String fromTime,
                                                @Param("toTime") String toTime);
 }
