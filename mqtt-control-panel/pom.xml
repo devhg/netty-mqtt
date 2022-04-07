@@ -37,6 +37,10 @@
             <groupId>cn.sdutcs</groupId>
             <artifactId>mqtt-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>cn.sdutcs</groupId>
+            <artifactId>mqtt-auth</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -44,11 +44,15 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
     @Autowired
     QpsCounter qpsCounter;
 
+    @Autowired
+    private CountInfo countInfo;
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         this.channelGroup.add(ctx.channel());
         this.channelIdMap.put(brokerProperties.getId() + "_" + ctx.channel().id().asLongText(), ctx.channel().id());
+        countInfo.setCurChannelNum(channelGroup.size());
     }
 
     @Override
@@ -56,12 +60,16 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
         super.channelInactive(ctx);
         this.channelGroup.remove(ctx.channel());
         this.channelIdMap.remove(brokerProperties.getId() + "_" + ctx.channel().id().asLongText());
+        System.out.println("inactive");
+        countInfo.setCurChannelNum(channelGroup.size());
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) throws Exception {
         // qps计数
-        qpsCounter.Count("qps");
+        // qpsCounter.Count("qps");
+        countInfo.getReceiveNum().incrementAndGet();
+        countInfo.setLastReceiveTime(System.currentTimeMillis());
 
         if (msg.decoderResult().isFailure()) {
             Throwable cause = msg.decoderResult().cause();

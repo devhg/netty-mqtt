@@ -18,7 +18,7 @@ public class ClientService {
     private ClientMapper clientMapper;
 
     @Transactional
-    public boolean addNewClient(ClientPo clientPo) {
+    public boolean addNewClient(ClientPo clientPo) throws Exception {
         int affectedRows = clientMapper.insert(clientPo);
         if (affectedRows == 1) {
             ClientPo client = clientMapper.getClientByName(clientPo.getClientName());

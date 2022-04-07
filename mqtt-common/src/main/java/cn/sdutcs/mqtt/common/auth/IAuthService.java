@@ -10,4 +10,6 @@ public interface IAuthService {
      */
     boolean checkValid(String username, String password);
 
+    String genPassword(String username);
+
 }

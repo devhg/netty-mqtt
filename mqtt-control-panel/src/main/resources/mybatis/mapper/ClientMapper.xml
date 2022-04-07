@@ -57,7 +57,7 @@
     <insert id="insert" parameterType="cn.sdutcs.mqtt.panel.model.User">
         INSERT INTO client_list
         (client_id, client_name, group_name, email, phone, op_user, create_time)
-        VALUES (#{clientId}, #{clientName}, #{groupName}, #{email}, #{phone}, #{opUser}, NOW())
+        VALUES (#{clientName}, #{clientName}, #{groupName}, #{email}, #{phone}, #{opUser}, NOW())
     </insert>
 
     <update id="updateClientIdByName">

@@ -24,7 +24,6 @@ public class Publish {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Publish.class);
 
-
     private final BrokerConfig brokerProperties;
     private final ConcurrentHashMap<String, ChannelId> channelIdMap;
 
@@ -69,19 +68,19 @@ public class Publish {
 
         // Qos=0
         if (qosLevel == MqttQoS.AT_MOST_ONCE) {
-            // internalCommunication.internalSend(internalMessage);
+            internalCommunication.internalSend(internalMessage);
             messageSender.sendPublishMessage(clientId, topicName, qosLevel, messageBytes, false, false);
 
         }
         // Qos=1
         if (qosLevel == MqttQoS.AT_LEAST_ONCE) {
-            // internalCommunication.internalSend(internalMessage);
+            internalCommunication.internalSend(internalMessage);
             messageSender.sendPublishMessage(clientId, topicName, qosLevel, messageBytes, false, false);
             messageSender.sendPubAckMessage(clientId, channel, msg.variableHeader().packetId());
         }
         // Qos=2
         if (qosLevel == MqttQoS.EXACTLY_ONCE) {
-            // internalCommunication.internalSend(internalMessage);
+            internalCommunication.internalSend(internalMessage);
             messageSender.sendPublishMessage(clientId, topicName, qosLevel, messageBytes, false, false);
             messageSender.sendPubAckMessage(clientId, channel, msg.variableHeader().packetId());
             // this.sendPubRecMessage(channel, msg.variableHeader().packetId());

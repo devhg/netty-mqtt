@@ -14,17 +14,17 @@ import java.util.Scanner;
  */
 public class RsaKeyUtil {
 
-	/**
-	 * 生成私钥文件
-	 */
-	public static void main(String[] args) {
-		System.out.print("输入保存密钥文件的路径(如: D:/keystore/ ): ");
-		Scanner scanner = new Scanner(System.in);
-		String path = scanner.nextLine();
-		KeyPair keyPair = SecureUtil.generateKeyPair("RSA", 512, LocalDateTime.now().toString().getBytes());
-		RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-		String privatePath = path + "auth-private.key";
-		IoUtil.writeObjects(FileUtil.getOutputStream(privatePath), true, privateKey);
-	}
+    /**
+     * 生成私钥文件
+     */
+    public static void main(String[] args) {
+        System.out.print("输入保存密钥文件的路径(如: D:/keystore/ ): ");
+        Scanner scanner = new Scanner(System.in);
+        String path = scanner.nextLine();
+        KeyPair keyPair = SecureUtil.generateKeyPair("RSA", 512, LocalDateTime.now().toString().getBytes());
+        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
+        String privatePath = path + "auth-private.key";
+        IoUtil.writeObjects(FileUtil.getOutputStream(privatePath), true, privateKey);
+    }
 
 }

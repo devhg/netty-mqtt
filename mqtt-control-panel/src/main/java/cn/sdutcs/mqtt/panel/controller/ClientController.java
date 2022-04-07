@@ -1,5 +1,6 @@
 package cn.sdutcs.mqtt.panel.controller;
 
+import cn.sdutcs.mqtt.common.auth.IAuthService;
 import cn.sdutcs.mqtt.panel.model.BlackIP;
 import cn.sdutcs.mqtt.panel.model.ClientPo;
 import cn.sdutcs.mqtt.panel.model.Result;
@@ -22,6 +23,8 @@ public class ClientController {
 
     @Autowired
     private ClientService clientService;
+    @Autowired
+    private IAuthService authService;
 
     @GetMapping("/list")
     public Result<Object> getClientList(@RequestParam(name = "page", defaultValue = "1") int page,
@@ -32,15 +35,26 @@ public class ClientController {
         return Result.success(res);
     }
 
+    @GetMapping(value = "/loginPwd")
+    public Result<Object> getClientPasswdByClientName(@RequestParam(name = "clientName") String clientName) {
+        String key = authService.genPassword(clientName);
+        return Result.success(key);
+    }
+
     @PostMapping("/create")
     public Result<Object> createClient(@RequestBody ClientPo clientPo) {
-        System.out.println("clientPo = " + clientPo);
-        boolean insertOK = clientService.addNewClient(clientPo);
+        boolean insertOK = false;
+        try {
+            insertOK = clientService.addNewClient(clientPo);
+        } catch (Exception e) {
+            // e.printStackTrace();
+            return Result.failure("注册失败，此客户端名称已经存在");
+        }
         return insertOK ? Result.success("客户端注册成功") : Result.failure("客户端注册失败");
     }
 
     @DeleteMapping(value = "/delete")
-    public Result<Object> delete(@RequestParam(name = "id") Long id) {
+    public Result<Object> deleteClient(@RequestParam(name = "id") Long id) {
         boolean deleteOk = clientService.deleteFromClientList(id);
         return deleteOk ? Result.success("删除成功") : Result.failure("删除失败");
     }

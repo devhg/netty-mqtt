@@ -59,6 +59,7 @@ public class SubscribeStoreService implements ISubscribeStoreService {
 
     @Override
     public List<SubscribeStore> search(String topic) {
+        // todo 性能存在问题
         List<SubscribeStore> subscribeStores = new ArrayList<SubscribeStore>();
         List<SubscribeStore> notWildSubscribeStores = subscribeNotWildcardCache.all(topic);
         if (notWildSubscribeStores.size() > 0) {

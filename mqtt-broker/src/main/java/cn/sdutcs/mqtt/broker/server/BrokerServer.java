@@ -3,11 +3,12 @@ package cn.sdutcs.mqtt.broker.server;
 import cn.hutool.core.util.StrUtil;
 import cn.sdutcs.mqtt.broker.codec.MqttWebSocketCodec;
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
+import cn.sdutcs.mqtt.broker.handler.CountInfo;
 import cn.sdutcs.mqtt.broker.handler.BrokerHandler;
 import cn.sdutcs.mqtt.broker.internal.InternalCommunication;
 import cn.sdutcs.mqtt.broker.internal.InternalMessage;
 import cn.sdutcs.mqtt.broker.service.KafkaService;
-import cn.sdutcs.mqtt.broker.service.RedisService;
+import cn.sdutcs.mqtt.broker.service.StatService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
@@ -60,10 +61,16 @@ public class BrokerServer implements Lifecycle {
     @Autowired
     InternalCommunication internalCommunication;
     @Autowired
-    private RedisService redisService;
+    private StatService statService;
 
     @Autowired
     private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
+
+    /**
+     * Server统计信息
+     */
+    @Autowired
+    protected CountInfo countInfo;
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
@@ -89,7 +96,7 @@ public class BrokerServer implements Lifecycle {
         LOGGER.info("Initializing {} MQTT Broker ...", "[" + brokerProperties.getId() + "]");
 
         // 存储元信息
-        redisService.storeBrokerConfig();
+        statService.storeBrokerConfig();
 
         // 开启SSL
         if (brokerProperties.getSslEnabled()) {
@@ -163,6 +170,10 @@ public class BrokerServer implements Lifecycle {
     @Bean(name = "channelIdMap")
     public ConcurrentHashMap<String, ChannelId> getChannelIdMap() {
         return this.channelIdMap;
+    }
+
+    public CountInfo getCountInfo() {
+        return this.countInfo;
     }
 
     public boolean useEpoll() {
