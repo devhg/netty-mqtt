@@ -20,7 +20,6 @@ public class ServerStateReportJob {
 
     @Scheduled(fixedRate = 5000)
     public void scheduledTask() {
-        System.out.println("countInfo = " + countInfo);
         statService.storeBrokerCountInfo(countInfo);
     }
 }

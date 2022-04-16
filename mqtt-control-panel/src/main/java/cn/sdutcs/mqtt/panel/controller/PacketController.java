@@ -57,7 +57,7 @@ public class PacketController {
     public Result<Object> getQps(@RequestParam(name = "t") String time) {
         long t = Long.parseLong(time);
         Timestamp toTime = new Timestamp(t);
-        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
         String tStr = sdf.format(toTime);
 
         Integer qps = qpsCounter.GetCount("qps", tStr);

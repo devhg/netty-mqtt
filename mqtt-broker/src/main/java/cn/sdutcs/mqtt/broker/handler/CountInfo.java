@@ -1,11 +1,8 @@
 package cn.sdutcs.mqtt.broker.handler;
 
-import org.springframework.stereotype.Component;
-
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Component
 public class CountInfo implements Serializable {
 
     private static final long serialVersionUID = -1705088025632217227L;
@@ -38,6 +35,10 @@ public class CountInfo implements Serializable {
      * 收发心跳数
      */
     private AtomicLong heartbeatNum = new AtomicLong();
+    /**
+     * CPU使用频率
+     */
+    private double Cpu;
 
     public long getCurChannelNum() {
         return curChannelNum;
@@ -86,6 +87,14 @@ public class CountInfo implements Serializable {
         }
     }
 
+    public double getCpu() {
+        return Cpu;
+    }
+
+    public void setCpu(double cpu) {
+        this.Cpu = cpu;
+    }
+
     @Override
     public String toString() {
         return "CountInfo{" +
@@ -96,6 +105,7 @@ public class CountInfo implements Serializable {
                 ", receiveNum=" + receiveNum +
                 ", sentNum=" + sentNum +
                 ", heartbeatNum=" + heartbeatNum +
+                ", Cpu=" + Cpu +
                 '}';
     }
 }

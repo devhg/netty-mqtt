@@ -3,6 +3,7 @@ package cn.sdutcs.mqtt.broker.server;
 import cn.hutool.core.util.StrUtil;
 import cn.sdutcs.mqtt.broker.codec.MqttWebSocketCodec;
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
+import cn.sdutcs.mqtt.broker.handler.CountHandler;
 import cn.sdutcs.mqtt.broker.handler.CountInfo;
 import cn.sdutcs.mqtt.broker.handler.BrokerHandler;
 import cn.sdutcs.mqtt.broker.internal.InternalCommunication;
@@ -47,6 +48,7 @@ import javax.net.ssl.SSLEngine;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class BrokerServer implements Lifecycle {
@@ -72,11 +74,18 @@ public class BrokerServer implements Lifecycle {
     @Autowired
     protected CountInfo countInfo;
 
+    @Autowired
+    private CountHandler countHandler;
+    @Autowired
+    private BrokerHandler brokerHandler;
+
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
     private ChannelGroup channelGroup;
     private ConcurrentHashMap<String, ChannelId> channelIdMap;
+
+    private ConcurrentHashMap<String, AtomicLong> localCounter;
 
     private SslContext sslContext;
 
@@ -86,6 +95,7 @@ public class BrokerServer implements Lifecycle {
     public BrokerServer() {
         channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
         channelIdMap = new ConcurrentHashMap<>();
+        localCounter = new ConcurrentHashMap<>();
         bossGroup = useEpoll() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
         workerGroup = useEpoll() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
     }
@@ -172,6 +182,11 @@ public class BrokerServer implements Lifecycle {
         return this.channelIdMap;
     }
 
+    @Bean(name = "localCounter")
+    public ConcurrentHashMap<String, AtomicLong> getLocalCounter() {
+        return this.localCounter;
+    }
+
     public CountInfo getCountInfo() {
         return this.countInfo;
     }
@@ -207,7 +222,8 @@ public class BrokerServer implements Lifecycle {
                         }
                         pipeline.addLast("decoder", new MqttDecoder());
                         pipeline.addLast("encoder", MqttEncoder.INSTANCE);
-                        pipeline.addLast("broker", context.getBean(BrokerHandler.class));
+                        pipeline.addLast("counter", countHandler);
+                        pipeline.addLast("broker", brokerHandler);
                     }
                 })
                 .option(ChannelOption.SO_BACKLOG, brokerProperties.getSoBacklog())
@@ -251,7 +267,8 @@ public class BrokerServer implements Lifecycle {
                         pipeline.addLast("mqttWebSocket", new MqttWebSocketCodec());
                         pipeline.addLast("decoder", new MqttDecoder());
                         pipeline.addLast("encoder", MqttEncoder.INSTANCE);
-                        pipeline.addLast("broker", context.getBean(BrokerHandler.class));
+                        pipeline.addLast("counter", countHandler);
+                        pipeline.addLast("broker", brokerHandler);
                     }
                 })
                 .option(ChannelOption.SO_BACKLOG, brokerProperties.getSoBacklog())

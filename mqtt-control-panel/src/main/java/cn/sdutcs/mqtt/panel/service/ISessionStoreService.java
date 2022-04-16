@@ -28,11 +28,12 @@ public class ISessionStoreService {
             if (StrUtil.isNotBlank(jsonObj)) {
                 return JSON.parseObject(jsonObj, Map.class);
             } else {
-                return new SessionStore("brokerId", clientId, "unActive").toMap();
+                return new SessionStore("null", clientId, "unActive").toMap();
             }
         }).collect(Collectors.toList());
     }
 
-    public void remove(String clientId) {
+    public Boolean remove(String clientId) {
+        return redisTemplate.delete(CACHE_PRE + clientId);
     }
 }

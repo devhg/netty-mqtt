@@ -46,6 +46,9 @@ public class PingReq {
             MqttMessage pingRespMessage = MqttMessageHelper.getPingRespMessage();
             channel.writeAndFlush(pingRespMessage);
             LOGGER.info("PINGRESP [C <- S] - to clientId: {}", clientId);
+        } else {
+            // 会话过期 删掉
+            channel.close();
         }
     }
 }

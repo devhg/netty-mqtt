@@ -55,6 +55,9 @@ public class Publish {
             if (brokerProperties.getId().equals(sessionStore.getBrokerId()) && channelId != null) {
                 sessionStoreService.expire(clientId, sessionStore.getExpire());
             }
+        } else {
+            channel.close();
+            return;
         }
 
         MqttQoS qosLevel = msg.fixedHeader().qosLevel();

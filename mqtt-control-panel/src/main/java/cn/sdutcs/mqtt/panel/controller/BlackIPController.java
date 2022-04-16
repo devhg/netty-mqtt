@@ -39,7 +39,7 @@ public class BlackIPController {
     }
 
     @DeleteMapping(value = "/delete")
-    public Result<Object> delete(@RequestBody BlackIP blackIP) {
+    public Result<Object> deleteBlackIP(@RequestBody BlackIP blackIP) {
         boolean deleteOk = blackListService.deleteIPFromBlackList(blackIP.getId());
         return deleteOk ? Result.success("删除成功") : Result.failure("删除失败");
     }

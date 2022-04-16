@@ -2,8 +2,8 @@ package cn.sdutcs.mqtt.broker.handler;
 
 import cn.sdutcs.mqtt.broker.config.BrokerConfig;
 import cn.sdutcs.mqtt.broker.protocol.ProtocolProcess;
+import cn.sdutcs.mqtt.broker.service.QpsCounter;
 import cn.sdutcs.mqtt.common.session.SessionStore;
-import cn.sdutcs.mqtt.store.cache.QpsCounter;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.DecoderException;
@@ -60,14 +60,13 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
         super.channelInactive(ctx);
         this.channelGroup.remove(ctx.channel());
         this.channelIdMap.remove(brokerProperties.getId() + "_" + ctx.channel().id().asLongText());
-        System.out.println("inactive");
         countInfo.setCurChannelNum(channelGroup.size());
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) throws Exception {
         // qps计数
-        // qpsCounter.Count("qps");
+        qpsCounter.Count("qps");
         countInfo.getReceiveNum().incrementAndGet();
         countInfo.setLastReceiveTime(System.currentTimeMillis());
 
@@ -125,6 +124,7 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
                 break;
             case PINGREQ:
                 protocolProcess.pingReq().processPingReq(ctx.channel(), msg);
+                countInfo.getHeartbeatNum().incrementAndGet();
                 break;
             case PINGRESP:
                 break;

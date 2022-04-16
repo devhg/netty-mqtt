@@ -16,17 +16,16 @@ public class SessionController {
     private ISessionStoreService sessionStoreService;
 
     @GetMapping("/list")
-    public Result<Object> getBlackIPList(@RequestParam(name = "ip", required = false) String ip,
+    public Result<Object> getSessionList(@RequestParam(name = "ip", required = false) String ip,
                                          @RequestParam(name = "opUser", required = false) String opUser) {
-        // List<BlackIP> blackIPList = blackListService.fetchIPBlackList(ip, opUser);
         List<Map> sessionList = sessionStoreService.getSessionList();
         return Result.success(sessionList);
     }
 
     @DeleteMapping(value = "/logout")
-    public Result<Object> logout(@RequestParam(name = "ip", required = false) String clientId) {
-        sessionStoreService.remove(clientId);
-        boolean deleteOk = true;
+    public Result<Object> sessionLogout(@RequestParam(name = "clientId") String clientId) {
+        System.out.println(clientId);
+        boolean deleteOk = sessionStoreService.remove(clientId);
         return deleteOk ? Result.success("下线成功") : Result.failure("下线失败");
     }
 }
