@@ -30,7 +30,7 @@ public class PacketController {
     private QpsCounter qpsCounter;
 
     @GetMapping("/list")
-    public Result<Object> getList(@RequestParam(name = "page", defaultValue = "1") int page,
+    public Result<Object> getPacketList(@RequestParam(name = "page", defaultValue = "1") int page,
                                   @RequestParam(name = "pageSize", defaultValue = "20") int pageSize,
                                   @RequestParam(name = "from", required = false) String from,
                                   @RequestParam(name = "to", required = false) String to,
@@ -51,21 +51,6 @@ public class PacketController {
         res.put("total", packetsTotal);
 
         return Result.success(res);
-    }
-
-    @GetMapping("/qps")
-    public Result<Object> getQps(@RequestParam(name = "t") String time) {
-        long t = Long.parseLong(time);
-        Timestamp toTime = new Timestamp(t);
-        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-        String tStr = sdf.format(toTime);
-
-        Integer qps = qpsCounter.GetCount("qps", tStr);
-        Map<String, Object> data = new HashMap<>();
-        data.put("x", time);
-        data.put("y", qps);
-
-        return Result.success(data);
     }
 
     @GetMapping("/packets_per_second")

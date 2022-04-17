@@ -45,6 +45,9 @@ public class DateUtil {
         return format.format(today);
     }
 
+    /**
+     * 获取当前时间 （以format格式化）
+     */
     public static String now(String format) {
         DateFormat df = new SimpleDateFormat(format);
         return df.format(new Date());
