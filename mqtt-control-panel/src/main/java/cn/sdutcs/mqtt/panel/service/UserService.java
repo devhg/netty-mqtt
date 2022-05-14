@@ -17,4 +17,11 @@ public class UserService {
         }
         return userMapper.validLogin(username, password);
     }
+
+    public boolean registerNewUser(User user) {
+        if (user == null) {
+            return false;
+        }
+        return userMapper.insert(user) == 1;
+    }
 }

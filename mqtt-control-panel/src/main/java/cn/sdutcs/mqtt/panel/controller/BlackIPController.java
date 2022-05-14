@@ -4,6 +4,7 @@ import cn.sdutcs.mqtt.panel.model.BlackIP;
 import cn.sdutcs.mqtt.panel.model.Result;
 import cn.sdutcs.mqtt.panel.service.BlackListService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class BlackIPController {
     @Autowired
     private BlackListService blackListService;
 
-    @GetMapping("/list")
+    @GetMapping(value = "/list", produces = MediaType.APPLICATION_XHTML_XML_VALUE)
     public Result<Object> getBlackIPList(@RequestParam(name = "ip", required = false) String ip,
                                          @RequestParam(name = "opUser", required = false) String opUser) {
         List<BlackIP> blackIPList = blackListService.fetchIPBlackList(ip, opUser);

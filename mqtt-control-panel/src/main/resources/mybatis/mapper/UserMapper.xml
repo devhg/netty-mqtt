@@ -39,8 +39,8 @@
 
     <insert id="insert" parameterType="cn.sdutcs.mqtt.panel.model.User">
         INSERT INTO users
-            (userName, passWord, user_sex)
-        VALUES (#{userName}, #{passWord}, #{userSex})
+            (username, password, nick_name, email)
+        VALUES (#{username}, #{password}, #{nickName}, #{email})
     </insert>
 
     <update id="update" parameterType="cn.sdutcs.mqtt.panel.model.User">
