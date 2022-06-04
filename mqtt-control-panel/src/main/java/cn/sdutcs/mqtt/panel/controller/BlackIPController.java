@@ -1,5 +1,6 @@
 package cn.sdutcs.mqtt.panel.controller;
 
+import cn.hutool.core.util.StrUtil;
 import cn.sdutcs.mqtt.panel.model.BlackIP;
 import cn.sdutcs.mqtt.panel.model.Result;
 import cn.sdutcs.mqtt.panel.service.BlackListService;
@@ -14,15 +15,23 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/blackip")
+@CrossOrigin
 public class BlackIPController {
 
     @Autowired
     private BlackListService blackListService;
 
-    @GetMapping(value = "/list", produces = MediaType.APPLICATION_XHTML_XML_VALUE)
+    @GetMapping(value = "/list")
     public Result<Object> getBlackIPList(@RequestParam(name = "ip", required = false) String ip,
                                          @RequestParam(name = "opUser", required = false) String opUser) {
+        if (StrUtil.isBlank(ip)) {
+            ip = null;
+        }
+        if (StrUtil.isBlank(opUser)) {
+            opUser = null;
+        }
         List<BlackIP> blackIPList = blackListService.fetchIPBlackList(ip, opUser);
+        System.out.println(blackIPList);
         return Result.success(blackIPList);
     }
 

@@ -1,5 +1,6 @@
 package cn.sdutcs.mqtt.panel.controller;
 
+import cn.hutool.core.util.StrUtil;
 import cn.sdutcs.mqtt.common.auth.IAuthService;
 import cn.sdutcs.mqtt.panel.model.BlackIP;
 import cn.sdutcs.mqtt.panel.model.ClientPo;
@@ -18,6 +19,7 @@ import java.util.Map;
  * 客户端管理
  */
 @RestController
+@CrossOrigin
 @RequestMapping("/client")
 public class ClientController {
 
@@ -27,10 +29,19 @@ public class ClientController {
     private IAuthService authService;
 
     @GetMapping("/list")
-    public Result<Object> getClientList(@RequestParam(name = "page", defaultValue = "1") int page,
-                                        @RequestParam(name = "pageSize", defaultValue = "20") int pageSize,
+    public Result<Object> getClientList(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                        @RequestParam(name = "pageSize", required = false, defaultValue = "20") int pageSize,
                                         @RequestParam(name = "groupName", required = false) String groupName,
                                         @RequestParam(name = "opUser", required = false) String opUser) {
+        System.out.println("page = " + page);
+
+        if (StrUtil.isBlank(groupName)) {
+            groupName = null;
+        }
+        if (StrUtil.isBlank(opUser)) {
+            opUser = null;
+        }
+
         Map<String, Object> res = clientService.fetchClientList(page, pageSize, groupName, opUser);
         return Result.success(res);
     }

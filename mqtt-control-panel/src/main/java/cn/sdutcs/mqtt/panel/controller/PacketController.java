@@ -7,10 +7,7 @@ import cn.sdutcs.mqtt.panel.model.Result;
 import cn.sdutcs.mqtt.panel.service.PacketService;
 import cn.sdutcs.mqtt.panel.service.QpsCounter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -21,6 +18,7 @@ import java.util.*;
  * 报文监控 测试通过
  */
 @RestController
+@CrossOrigin
 @RequestMapping("/packet")
 public class PacketController {
 

@@ -13,24 +13,19 @@ public class TopicMatcher {
      * 如果是通配符[+|#]，保留通配符（若[#]直接跳出，#后不允许接后缀），否则从topic取出
      * 用于构造新的filter。遍历结束后，如果新的构造filter等于原topicFilter证明匹配，反之。
      * <p>
-     * topic:  test/a/b/c
-     * filter: test/a/+/#
+     * topic:  test/a/b/c, filter: test/a/+/#
      * 结果：   test/a/+/# == filter   match
      * <p>
-     * topic:  test/aa/b/c
-     * filter: test/a/+/#
+     * topic:  test/aa/b/c, filter: test/a/+/#
      * 结果：   test/aa/+/# != filter  not match
      * <p>
-     * topic:  test/aa/b/c
-     * filter: test/a
+     * topic:  test/aa/b/c, filter: test/a
      * 结果：   test/aa != filter   not match
      * <p>
-     * topic:  test/a/b/c
-     * filter: test/#
+     * topic:  test/a/b/c, filter: test/#
      * 结果：   test/# == filter   match
      * <p>
-     * topic:  test/a
-     * filter: test/a/#
+     * topic:  test/a, filter: test/a/#
      * 结果：   topicEle.size() < filterEle.size()  not match
      */
     public static boolean match(String topicFilter, String topic) {

@@ -14,10 +14,12 @@
         FROM ip_black_list
         <where>
             <if test="ip != null">
-                and ip=#{ip}
+                <bind name="pattern" value="'%' + ip + '%'"/>
+                and ip LIKE #{pattern}
             </if>
             <if test="opUser != null">
-                and op_user=#{opUser}
+                <bind name="op" value="'%' + opUser + '%'"/>
+                and op_user LIKE #{op}
             </if>
         </where>
     </select>

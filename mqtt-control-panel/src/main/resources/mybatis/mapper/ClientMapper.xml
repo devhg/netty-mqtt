@@ -18,10 +18,12 @@
         FROM client_list
         <where>
             <if test="groupName != null">
-                and group_name=#{groupName}
+                <bind name="pattern" value="'%' + groupName + '%'"/>
+                and group_name LIKE #{pattern}
             </if>
             <if test="opUser != null">
-                and op_user=#{opUser}
+                <bind name="op" value="'%' + opUser + '%'"/>
+                and op_user LIKE #{op}
             </if>
             and delete_sign=0
         </where>

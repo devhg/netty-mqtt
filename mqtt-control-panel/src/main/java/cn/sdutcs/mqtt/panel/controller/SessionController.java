@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/session")
 public class SessionController {
 
@@ -16,8 +17,7 @@ public class SessionController {
     private ISessionStoreService sessionStoreService;
 
     @GetMapping("/list")
-    public Result<Object> getSessionList(@RequestParam(name = "ip", required = false) String ip,
-                                         @RequestParam(name = "opUser", required = false) String opUser) {
+    public Result<Object> getSessionList() {
         List<Map> sessionList = sessionStoreService.getSessionList();
         return Result.success(sessionList);
     }
