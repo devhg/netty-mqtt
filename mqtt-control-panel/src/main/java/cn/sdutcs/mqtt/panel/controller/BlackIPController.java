@@ -31,7 +31,6 @@ public class BlackIPController {
             opUser = null;
         }
         List<BlackIP> blackIPList = blackListService.fetchIPBlackList(ip, opUser);
-        System.out.println(blackIPList);
         return Result.success(blackIPList);
     }
 

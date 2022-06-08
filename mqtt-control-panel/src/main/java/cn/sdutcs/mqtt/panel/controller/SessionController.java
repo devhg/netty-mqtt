@@ -24,7 +24,6 @@ public class SessionController {
 
     @DeleteMapping(value = "/logout")
     public Result<Object> sessionLogout(@RequestParam(name = "clientId") String clientId) {
-        System.out.println(clientId);
         boolean deleteOk = sessionStoreService.remove(clientId);
         return deleteOk ? Result.success("下线成功") : Result.failure("下线失败");
     }

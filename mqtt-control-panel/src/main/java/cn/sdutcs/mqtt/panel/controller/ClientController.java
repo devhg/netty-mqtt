@@ -33,8 +33,6 @@ public class ClientController {
                                         @RequestParam(name = "pageSize", required = false, defaultValue = "20") int pageSize,
                                         @RequestParam(name = "groupName", required = false) String groupName,
                                         @RequestParam(name = "opUser", required = false) String opUser) {
-        System.out.println("page = " + page);
-
         if (StrUtil.isBlank(groupName)) {
             groupName = null;
         }

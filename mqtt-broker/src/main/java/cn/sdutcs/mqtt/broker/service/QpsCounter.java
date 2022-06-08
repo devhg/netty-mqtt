@@ -48,7 +48,6 @@ public class QpsCounter {
         localCounter.forEach((k, v) -> {
             // 已经不是当前时间（秒级）
             if (!k.equals(now)) {
-                System.out.println(k + "   " + v.get());
                 String secondKey = String.format("counter:qps:%s", k);
                 // todo redis事务
                 redisTemplate.opsForValue().set(secondKey, String.valueOf(v.get()), 300, TimeUnit.SECONDS);

@@ -1,0 +1,19 @@
+version: '3'
+services:
+  #  docker-compose --compatibility -f gateway.yml up -d
+  redis:
+    image: redis:latest
+    restart: "no"
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis.conf:/etc/redis/redis.conf
+      - ./data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+    command: redis-server /etc/redis/redis.conf
+    privileged: true

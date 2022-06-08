@@ -16,9 +16,7 @@ public class AuthController {
 
     @PostMapping("/auth/login")
     public Result login(@RequestBody User user) {
-        System.out.println("user = " + user);
         User u = userService.getUserByUnameAndPwd(user.getUsername(), user.getPassword());
-        System.out.println("u = " + u);
         if (u == null) {
             return Result.failure("账号密码错误");
         }
@@ -28,7 +26,6 @@ public class AuthController {
 
     @PostMapping("/auth/register")
     public Result register(@RequestBody User user) {
-        System.out.println("user = " + user);
         if (userService.registerNewUser(user)) {
             return Result.success("注册成功");
         }

@@ -42,7 +42,6 @@ public class KafkaService {
                     new FailureCallback() {
                         @Override
                         public void onFailure(Throwable e) {
-                            System.out.println(123131);
                             e.printStackTrace();
                             LOGGER.error(e.getMessage(), e);
                         }

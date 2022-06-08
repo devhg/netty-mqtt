@@ -1,0 +1,18 @@
+version: '3'
+services:
+  db:
+    image: 'docker.io/mysql:latest' #使用的镜像
+    restart: always
+    container_name: mysql-single  #容器名
+    volumes:
+      - ./data:/var/lib/mysql  #挂载目录，持久化存储
+    ports:
+      - '3306:3306'
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: "123456"   #设置root用户的密码
